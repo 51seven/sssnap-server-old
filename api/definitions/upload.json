@@ -1,0 +1,26 @@
+{
+  "Upload": {
+    "properties": {
+      "_id": {
+        "type": "string"
+      },
+      "_userid": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string"
+      },
+      "views": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "url": {
+        "type": "string"
+      },
+      "shorturl": {
+        "type": "string"
+      }
+    },
+    "required": ["_id", "_userid", "title", "url", "shorturl"]
+  }
+}
