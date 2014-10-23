@@ -26,6 +26,7 @@ You need to [send the UTC Date](https://github.com/51seven/sssnap-server/blob/ma
 
 ```
 Authorization: SNP PublicKey:Signature
+x-snp-date: UTC Time
 ```
 
 ### Creating a Signature
@@ -33,7 +34,7 @@ Authorization: SNP PublicKey:Signature
 First the client needs to create a string, which will be signed later. This string consists of 4 parts:
 - The HTTP Verb (`GET`, `POST`, `PUT`, `DELETE`)
 - The URL path without the host, including `/api` (e.g. `/api/upload`)
-- A string in base64 of the data the client sends in the HTTP body of his request. If there is no data in the body this will be an empty string. **[More information on how to convert the body.](https://github.com/51seven/sssnap-server/blob/master/api/Authentication.md#converting-the-data)
+- A string in base64 of the data the client sends in the HTTP body of his request. If there is no data in the body this will be an empty string. _[More information on how to convert the body.](https://github.com/51seven/sssnap-server/blob/master/api/Authentication.md#converting-the-data)_
 - The current Date using UTC Format (e.g. `2014-10-23T21:23:10Z`)
 
 Build your string in the following way:  
