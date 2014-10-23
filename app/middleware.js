@@ -40,10 +40,4 @@ module.exports = function(app) {
   // override HTTP Verbs, such as PUT and DELETE
   app.use(methodOverride());
 
-  // extend req.body with req.files
-  // because swagger-tools don't read req.files
-  app.use(function(req, res, next) {
-    _.assign(req.body, req.files);
-    next();
-  });
 };

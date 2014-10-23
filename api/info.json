@@ -5,7 +5,29 @@
     "description": "API for communication between the sssnap server and his clients",
     "version": "0.0.1"
   },
-  "produces": ["application/json"],
   "host": "localhost:3000",
-  "basePath": "/api"
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json",
+    "multipart/form-data"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "security": [
+    {
+      "clientCredentials": [ ]
+    }
+  ],
+  "securityDefinitions": {
+    "clientCredentials": {
+      "type": "apiKey",
+      "description": "Client credentials with a public and a private key using HMAC.",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
 }

@@ -1,23 +1,25 @@
 {
-  "/snap": {
+  "/upload": {
     "post": {
-      "x-swagger-router-controller": "snap",
-      "operationId": "uploadSnap",
-      "tags": ["/snap"],
+      "x-swagger-router-controller": "upload",
+      "operationId": "newUpload",
+      "tags": [ ],
       "description": "Stores an uploaded file and saves data about it in the database. Returns data about it.",
-      "consumes": ["multipart/form-data"],
+      "consumes": [
+        "multipart/form-data"
+      ],
       "parameters": [
         {
           "name": "file",
           "in": "formData",
-          "description": "Image to store.",
+          "description": "File to store",
           "required": true,
           "type": "file"
         },
         {
           "name": "userid",
           "in": "formData",
-          "description": "Unique identifier of an user.",
+          "description": "Unique identifier of an user",
           "required": true,
           "type": "string"
         }
@@ -29,8 +31,8 @@
             "$ref": "#/definitions/Upload"
           }
         },
-        "400": {
-          "description": "Bad request",
+        "403": {
+          "description": "Authentication failed",
           "schema": {
             "$ref": "#/definitions/Error"
           }

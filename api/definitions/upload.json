@@ -14,13 +14,16 @@
         "type": "integer",
         "format": "int64"
       },
-      "url": {
+      "filename": {
+        "type": "string"
+      },
+      "mimetype": {
         "type": "string"
       },
       "shorturl": {
         "type": "string"
       }
     },
-    "required": ["_id", "_userid", "title", "url", "shorturl"]
+    "required": ["_id", "_userid", "title", "filename", "shorturl"]
   }
 }

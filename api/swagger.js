@@ -19,7 +19,7 @@ function combineJSON(files, dir) {
 }
 
 var resourceFiles = [
-  'snap'
+  'upload'
 ];
 var definitionFiles = [
   'error',

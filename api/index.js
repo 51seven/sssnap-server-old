@@ -2,11 +2,13 @@
  * swagger API
  */
 
-var swaggerTools = require('swagger-tools')
+var _ = require('lodash')
+  , swaggerTools = require('swagger-tools')
   , swaggerMetadata = swaggerTools.middleware.v2.swaggerMetadata
   , swaggerRouter = swaggerTools.middleware.v2.swaggerRouter
   , swaggerUi = swaggerTools.middleware.v2.swaggerUi
-  , swaggerValidator = swaggerTools.middleware.v2.swaggerValidator;
+  , swaggerValidator = swaggerTools.middleware.v2.swaggerValidator
+  , apiAuhtorization = require('./auth');
 
 
 var options = {
@@ -51,6 +53,16 @@ module.exports = function(app) {
       process.exit(1);
     }
   }
+
+  // Authorization of incoming requests
+  app.use(apiAuhtorization);
+
+  // extend req.body with req.files
+  // because swagger-tools don't read req.files
+  app.use(function(req, res, next) {
+    _.assign(req.body, req.files);
+    next();
+  });
 
   // Interpret Swagger resources and attach metadata to request
   app.use(swaggerMetadata(swaggerDoc));
