@@ -9,7 +9,7 @@ A client needs client credentials, more precisely a public and private key, to a
 
 An example of a HTTP Request could look like this:
 
-```HTTP
+```
 POST /api/upload HTTP/1.1  
 Host: localhost:3000  
 Date: Thu, 23 Oct 2014 23:23:11 +0200  
@@ -22,9 +22,9 @@ Authentication Header
 ---------------------
 
 To be authenticated the client needs to create a Signature. This Signature will be send together with the clients public key in the standard HTTP `Authorization` header.  
-You need to send the UTC Date in a spicial HTTP header field named `x-snp-date`.
+You need to [send the UTC Date](https://github.com/51seven/sssnap-server/blob/master/api/Authentication.md#life-time-of-the-signature) in a special HTTP header field named `x-snp-date`.
 
-```HTTP
+```
 Authorization: SNP PublicKey:Signature
 ```
 
@@ -33,7 +33,7 @@ Authorization: SNP PublicKey:Signature
 First the client needs to create a string, which will be signed later. This string consists of 4 parts:
 - The HTTP Verb (`GET`, `POST`, `PUT`, `DELETE`)
 - The URL path without the host, including `/api` (e.g. `/api/upload`)
-- A string in base64 of the data the client sends in the HTTP body of his request. If there is no data in the body this will be an empty string. More information on how to convert the body.
+- A string in base64 of the data the client sends in the HTTP body of his request. If there is no data in the body this will be an empty string. **[More information on how to convert the body.](https://github.com/51seven/sssnap-server/blob/master/api/Authentication.md#converting-the-data)
 - The current Date using UTC Format (e.g. `2014-10-23T21:23:10Z`)
 
 Build your string in the following way:  
