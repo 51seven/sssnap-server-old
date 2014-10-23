@@ -45,6 +45,8 @@ HashedData + "\n" +
 UTCDate
 ```
 
+_Note: The visible line breaks, not the `\n`'s, are there for clarity. If you make these visible line breaks too, for example in an online HMAC Tool to test this, you will add more `\n`'s than you should. This would result in a wrong HMAC._
+
 The strings will look like this:  
 ```
 POST\n
