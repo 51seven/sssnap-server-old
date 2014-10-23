@@ -25,7 +25,9 @@ module.exports = function(app) {
   app.use(logger('dev'));
 
   // multer only parses multipart/form-data
-  app.use(multer({ dest: './uploads/'}));
+  // stores incoming files in /uploads/temp
+  // controllers do have to delete these temporary files
+  app.use(multer({ dest: './uploads/temp'}));
 
   // bodyParser parses application/*
   app.use(bodyParser.json());
