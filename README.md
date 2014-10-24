@@ -1,7 +1,4 @@
-sssnap Server
-[![Build Status](https://travis-ci.org/51seven/sssnap-server.svg?branch=master)](https://travis-ci.org/51seven/sssnap-server)
-[![Coverage Status](https://img.shields.io/coveralls/51seven/sssnap-server.svg)](https://coveralls.io/r/51seven/sssnap-server)
-=============
+# sssnap Server [![Build Status][travis-image]][travis-url] [![Test Coverage][coveralls-image]][coveralls-url] [![Dependency Status][dependency-image]][dependency-url]
 
 Written in node.js with use of express.js.  
 This server offers a RESTful API for the [sssnap OSX Client](https://github.com/51seven/sssnap-osx-v2/blob/master/README.md).
@@ -26,3 +23,10 @@ Milestones
 - [x] The API is only accessible with a private key
 - [ ] The server registers a new user
 - [ ] The server creates a session for a user
+
+[travis-image]: http://img.shields.io/travis/51seven/sssnap-server.svg?style=flat
+[travis-url]: https://travis-ci.org/51seven/sssnap-server
+[coveralls-image]: http://img.shields.io/coveralls/51seven/sssnap-server.svg?style=flat
+[coveralls-url]: https://coveralls.io/r/51seven/sssnap-server
+[dependency-image]: http://img.shields.io/david/51seven/sssnap-server.svg?style=flat
+[dependency-url]: https://david-dm.org/51seven/sssnap-server
