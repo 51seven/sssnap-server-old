@@ -17,16 +17,16 @@ module.exports = function(app) {
   if (app.get('env') === 'development') {
     app.use(function(err, req, res, next) {
       res.status(err.status || 500);
-      if(req.accepts('application/json')) {
-        res.send({
-          message: err.message,
-          info: err
-        });
-      }
-      else {
+      if(req.accepts('text/html')) {
         res.render('error', {
           message: err.message,
           error: err
+        });
+      }
+      else {
+        res.send({
+          message: err.message,
+          info: err
         });
       }
     });
@@ -36,15 +36,15 @@ module.exports = function(app) {
   // no stacktraces leaked to user
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
-    if(req.accepts('application/json')) {
-      res.send({
-        message: err.message
-      });
-    }
-    else {
+    if(req.accepts('text/html')) {
       res.render('error', {
         message: err.message,
         error: {}
+      });
+    }
+    else {
+      res.send({
+        message: err.message
       });
     }
   });
