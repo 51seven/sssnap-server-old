@@ -20,7 +20,7 @@ Milestones
 (_also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_)
 
 - [ ] The client can upload a file
-- [ ] The API answers with a good and meaningful response
-- [ ] The API is only accessible with a private key
+- [x] The API answers with a good and meaningful response
+- [x] The API is only accessible with a private key
 - [ ] The server registers a new user
 - [ ] The server creates a session for a user

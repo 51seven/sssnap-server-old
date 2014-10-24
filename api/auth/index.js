@@ -2,55 +2,9 @@
  * API Authentication module
  */
 
-var _ = require('lodash')
-  , md5 = require('MD5')
-  , crypto = require('crypto')
-  , Promise = require('bluebird');
+var _ = require('lodash');
 
-/**
- * takes the HTTP body as JSON, converts it
- * into raw data, hashes it with md5 and returns
- * it as base64
- * @param  {Object} body req.body
- * @return {String}      hashed and base64'd string
- */
-function convertBodyToHash(body) {
-  var raw = "";
-  var pair;
-  var hash;
-  _.forEach(body, function(value, key) {
-    pair = key + "=" + value + "&";
-    raw += pair;
-  });
-  raw = raw.substring(0, raw.length - 1);
-  hash = md5(raw);
-  return new Buffer(hash).toString('base64');
-}
-
-/**
- * takes a string and encrypt it using HMAC-SHA1
- * using a key
- * @param  {String} str    String to encrypt
- * @param  {String} key    Key to use for encryption
- * @return {String}        Hash as HEX
- */
-function createHMAC(str, key) {
-  var hash;
-  hash = crypto.createHmac('sha1', key).update(str).digest('hex');
-  return new Buffer(hash).toString('base64');
-}
-
-/**
- * extracts the public key and the signature from
- * the Authorization header
- * @param  {String} str Authorization header
- * @return {Array}      <Public Key|Signature>
- */
-function extractAuthorization(str) {
-  str = str.substring(4);
-  var cred = str.split(":");
-  return cred;
-}
+var helper = require('./helper');
 
 /**
  * Forbidden Error
@@ -111,24 +65,24 @@ module.exports = function(req, res, next) {
   // for building String to sign later
   var HashedData;
   if(_.isEmpty(req.body)) HashedData = "";
-  else HashedData = convertBodyToHash(req.body);
+  else HashedData = helper.convertBodyToHash(req.body);
 
   // Building the String, which will be
   // encrypted using HMAC-SHA1 and become
   // the signature
   var StringToSign =
-    HTTPVerb + "\\n" +
-    URLPath + "\\n" +
-    HashedData + "\\n" +
+    HTTPVerb + "\n" +
+    URLPath + "\n" +
+    HashedData + "\n" +
     headerISODate;
 
   // this signature should match the signature
   // send in the Authorization header
-  var buildSignature = createHMAC(StringToSign, "secret");
+  var buildSignature = helper.createHMAC(StringToSign, "secret");
 
   // Taking the authorization header and extract
   // the public key and the signature
-  var authorization = extractAuthorization(req.get('Authorization'));
+  var authorization = helper.extractAuthorization(req.get('Authorization'));
   var publicKey = authorization[0];
   var authSignature = authorization[1];
 
