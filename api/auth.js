@@ -52,6 +52,17 @@ function extractAuthorization(str) {
   return cred;
 }
 
+/**
+ * Forbidden Error
+ * @param {message} message Message to pass to error
+ * @return {Error}  Error Object with status 403
+ */
+var Forbidden = function(message) {
+  var err = new Error(message);
+  err.status = 403;
+  return err;
+}
+
 module.exports = function(req, res, next) {
   // Skip authentication in a no-production environment
   // Start in production with NODE_ENV=production npm start (or nodemon or whatever)
@@ -59,73 +70,65 @@ module.exports = function(req, res, next) {
     return next();
   }
 
-  // TODO: Sending a message with next won't work, res.status() won't work
-
   // Check if Authorization header field is available
   if(req.get('Authorization') === undefined) {
-    res.status(403);
-    return next('No Authorization code found in HTTP header');
+    return next(new Forbidden('No Authorization code found in HTTP header'));
   }
 
   // Check if x-snp-date header field is available
   if(req.get('x-snp-date') === undefined) {
-    res.status(403);
-    return next('No x-snp-date found in HTTP header')
+    return next(new Forbidden('No x-snp-date found in HTTP header'));
   }
 
   var headerISODate = req.get('x-snp-date');
 
-
-  // TODO: Something fails here
   // Check if x-snp-date header field is in UTC ISO format
-  /*if(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d/.test(req.get('x-snp-date')) === false) {
-    res.status(403);
-    return next('x-snp-date is not a valid UTC ISO format')
-  }*/
+  if(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d/.test(req.get('x-snp-date')) === false) {
+    return next(new Forbidden('x-snp-date is not a valid UTC ISO format'));
+  }
 
   var headerDate = Date.parse(req.get('x-snp-date'));
 
-  // TODO: Something fails here
   // Check if access expired (older than 5 minutes)
-  /*if(((new Date) - headerDate) < 300000) {
-    res.status(403);
-    return next('Authentication expired')
-  }*/
+  var dateCompare = (new Date) - headerDate;
+  if(dateCompare > 300000 || dateCompare < -30000) {
+    return next(new Forbidden('Authentication expired'));
+  }
 
-
-  // TODO: Document
+  // Getting HTTP Verb and Requested Path
+  // for building String to sign later
   var HTTPVerb = req.method;
   var URLPath = req.originalUrl;
-  var HashedData;
 
+  // Building Hashed Data from req.body
+  // for building String to sign later
+  var HashedData;
   if(_.isEmpty(req.body)) HashedData = "";
   else HashedData = convertBodyToHash(req.body);
 
+  // Building the String, which will be
+  // encrypted using HMAC-SHA1 and become
+  // the signature
   var StringToSign =
     HTTPVerb + "\\n" +
     URLPath + "\\n" +
     HashedData + "\\n" +
     headerISODate;
 
-  console.log(StringToSign);
-
   // this signature should match the signature
   // send in the Authorization header
-  var signature = createHMAC(StringToSign, "secret");
+  var buildSignature = createHMAC(StringToSign, "secret");
 
+  // Taking the authorization header and extract
+  // the public key and the signature
   var authorization = extractAuthorization(req.get('Authorization'));
-  console.log(authorization);
   var publicKey = authorization[0];
-  var checkSignature = authorization[1];
+  var authSignature = authorization[1];
 
-  console.log(signature);
-  console.log(checkSignature);
-
-  if(signature !== checkSignature) {
-    console.log('invalid');
-    res.status(403);
-    return next('Authorization code invalid')
+  if(buildSignature !== authSignature) {
+    return next(new Forbidden('Authorization code invalid'));
   } else {
+    // arrive here and you have access to the api
     next();
   }
 }
