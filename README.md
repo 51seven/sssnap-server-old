@@ -1,4 +1,6 @@
 sssnap Server
+[![Build Status](https://travis-ci.org/51seven/sssnap-server.svg?branch=master)](https://travis-ci.org/51seven/sssnap-server)
+[![Coverage Status](https://img.shields.io/coveralls/51seven/sssnap-server.svg)](https://coveralls.io/r/51seven/sssnap-server)
 =============
 
 Written in node.js with use of express.js.  
