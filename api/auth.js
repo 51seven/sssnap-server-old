@@ -70,6 +70,13 @@ module.exports = function(req, res, next) {
     return next();
   }
 
+  // Check if the route starts with /api/
+  // otherwise the authentication will become operative
+  // on every 404 route
+  if((req.originalUrl).substring(0, 5) !== '/api/') {
+    return next();
+  }
+
   // Check if Authorization header field is available
   if(req.get('Authorization') === undefined) {
     return next(new Forbidden('No Authorization code found in HTTP header'));
