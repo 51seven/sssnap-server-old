@@ -38,8 +38,7 @@ module.exports = function(app) {
     res.status(err.status || 500);
     if(req.accepts('application/json')) {
       res.send({
-        message: err.message,
-        info: err
+        message: err.message
       });
     }
     else {
