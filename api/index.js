@@ -24,6 +24,7 @@ module.exports = function(app) {
   var result = swaggerTools.specs.v2.validate(swaggerDoc);
 
   // Handle validation errors and warnings
+  /* istanbul ignore if */
   if (typeof result !== 'undefined') {
     if (result.errors.length > 0) {
       console.log('The server could not start due to invalid Swagger document...');
