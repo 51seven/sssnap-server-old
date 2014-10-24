@@ -12,7 +12,7 @@ var _ = require('lodash')
 
 
 var options = {
-  controllers: './controllers',
+  controllers: './app/controllers',
   useStubs: process.env.NODE_ENV === 'development' ? true : false
 };
 

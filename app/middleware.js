@@ -17,7 +17,7 @@ module.exports = function(app) {
 
   app.use(cors());
   // view engine setup
-  app.set('views', path.join(__dirname, '../views'));
+  app.set('views', path.join(__dirname, './views'));
   app.set('view engine', 'jade');
 
   // uncomment after placing your favicon in /public
@@ -27,7 +27,7 @@ module.exports = function(app) {
   // multer only parses multipart/form-data
   // stores incoming files in /uploads/temp
   // controllers do have to delete these temporary files
-  app.use(multer({ dest: './uploads/temp'}));
+  app.use(multer({ dest: '../uploads/temp'}));
 
   // bodyParser parses application/*
   app.use(bodyParser.json());
@@ -35,7 +35,7 @@ module.exports = function(app) {
   app.use(cookieParser());
 
   // path for static files
-  app.use(express.static(path.join(__dirname, '../public')));
+  app.use(express.static(path.join(__dirname, './public')));
 
   // override HTTP Verbs, such as PUT and DELETE
   app.use(methodOverride());

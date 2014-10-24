@@ -4,8 +4,8 @@
 
 var express = require('express');
 
-var index = require('../routes/index')
-  , swagger = require('../api');
+var index = require('./routes/index')
+  , swagger = require('./api');
 
 var api = express();
 

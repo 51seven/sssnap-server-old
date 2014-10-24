@@ -1,6 +1,6 @@
 var should = require('should');
 
-var helper = require('../../api/auth/helper');
+var helper = require('../../app/api/auth/helper');
 
 describe('Authorization Helper', function() {
   describe('convertBodyToHash', function() {

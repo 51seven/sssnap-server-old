@@ -1,7 +1,7 @@
 var request = require('supertest');
 
 var app = require('../../app')
-  , helper = require('../../api/auth/helper');
+  , helper = require('../../app/api/auth/helper');
 
 process.env.NODE_ENV = 'production';
 
