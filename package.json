@@ -19,7 +19,8 @@
     "swagger-tools": "~0.6.10",
     "multer": "~0.1.6",
     "bluebird": "~2.3.6",
-    "md5": "~1.0.0"
+    "md5": "~1.0.0",
+    "method-override": "~2.3.0"
   },
   "devDependencies": {
     "supertest": "~0.14.0",
