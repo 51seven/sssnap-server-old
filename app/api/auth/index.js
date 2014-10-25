@@ -20,7 +20,7 @@ var Forbidden = function(message) {
 module.exports = function(req, res, next) {
   // Skip authentication in a no-production environment
   // Start in production with NODE_ENV=production npm start (or nodemon or whatever)
-  if(process.env.NODE_ENV !== 'production') {
+  if(process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
     return next();
   }
 

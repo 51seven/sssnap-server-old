@@ -3,8 +3,6 @@ var request = require('supertest');
 var app = require('../../app')
   , helper = require('../../app/api/auth/helper');
 
-process.env.NODE_ENV = 'production';
-
 describe('Accessing the API', function() {
   describe('is forbidden with', function() {
 
