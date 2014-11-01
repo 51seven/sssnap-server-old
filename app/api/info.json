@@ -19,15 +19,18 @@
   ],
   "security": [
     {
-      "clientCredentials": [ ]
+      "googleOAuth2": [ ]
     }
   ],
   "securityDefinitions": {
-    "clientCredentials": {
-      "type": "apiKey",
-      "description": "Client credentials with a public and a private key using HMAC.",
-      "name": "Authorization",
-      "in": "header"
+    "googleOAuth2": {
+      "type": "oauth2",
+      "scopes": {},
+      "flow": "accessCode",
+      "description": "OAuth2 Login with Google",
+      "x-auth": "google",
+      "authorizationUrl": "https://github.com/login/oauth/authorize",
+      "tokenUrl": "https://github.com/login/oauth/access_token"
     }
   }
 }

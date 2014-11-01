@@ -6,7 +6,12 @@ This server offers a RESTful API for the [sssnap OSX Client](https://github.com/
 ### Functionality
 
 The user can Login with Google+ and the sssnap client. Once authorized the server will either create a session for the user or register the user beforehand.  
-The API will be secured using HMAC. Only clients who know the private key can communicate with the server.
+The API will be secured using an OAuth2.0 provider, at the moment with Google.
+
+### Running the API
+
+`npm start` Start in development environment  
+`npm run production` Start in production environment
 
 ### Production
 
@@ -22,7 +27,6 @@ Milestones
 - [x] The API answers with a good and meaningful response
 - [x] The API is only accessible with a private key
 - [ ] The server registers a new user
-- [ ] The server creates a session for a user
 
 [travis-image]: http://img.shields.io/travis/51seven/sssnap-server.svg?style=flat
 [travis-url]: https://travis-ci.org/51seven/sssnap-server

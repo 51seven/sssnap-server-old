@@ -11,7 +11,8 @@ var express = require('express')
   , methodOverride = require('method-override')
   , multer = require('multer')
   , cors = require('cors')
-  , _ = require('lodash');
+  , _ = require('lodash')
+  , swagger = require('swagspress');
 
 module.exports = function(app) {
 
@@ -39,5 +40,11 @@ module.exports = function(app) {
 
   // override HTTP Verbs, such as PUT and DELETE
   app.use(methodOverride());
+
+  app.use(swagger({
+    doc: path.join(__dirname, 'api/swagger.js'),
+    controller: path.join(__dirname, 'controllers'),
+    auth: path.join(__dirname, 'api/auth')
+  }));
 
 };

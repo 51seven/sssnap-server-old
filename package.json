@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "production": "NODE_ENV=production node ./bin/www",
     "test": "NODE_ENV=test mocha"
   },
   "dependencies": {
@@ -16,10 +17,10 @@
     "jade": "~1.7.0",
     "lodash": "~2.4.1",
     "cors": "~2.5.0",
-    "swagger-tools": "~0.6.10",
     "multer": "~0.1.6",
     "bluebird": "~2.3.6",
-    "method-override": "~2.3.0"
+    "method-override": "~2.3.0",
+    "swagspress": "git://github.com/51seven/swagspress"
   },
   "devDependencies": {
     "supertest": "~0.14.0",

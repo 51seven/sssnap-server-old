@@ -19,6 +19,7 @@ function combineJSON(files, dir) {
 }
 
 var resourceFiles = [
+  'user',
   'upload'
 ];
 var definitionFiles = [

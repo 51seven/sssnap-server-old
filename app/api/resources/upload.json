@@ -1,7 +1,7 @@
 {
   "/upload": {
     "post": {
-      "x-swagger-router-controller": "upload",
+      "x-controller": "upload",
       "operationId": "newUpload",
       "tags": [ ],
       "description": "Stores an uploaded file and saves data about it in the database. Returns data about it.",
