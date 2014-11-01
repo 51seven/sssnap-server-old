@@ -5,8 +5,11 @@ This server offers a RESTful API for the [sssnap OSX Client](https://github.com/
 
 ### Functionality
 
-The user can Login with Google+ and the sssnap client. Once authorized the server will either create a session for the user or register the user beforehand.  
-The API will be secured using an OAuth2.0 provider, at the moment with Google.
+In the sssnap client the user will log in with Google (or an other OAuth2.0 provider). After logging in the client calls an API route to get more informations about the user. This route is used to register new users.  
+The API will only be accessible with an `access_token` from an OAuth2.0 provider. The `access_token` is added together with a `from` parameter to the called URL. The `from` parameter tells the server from which OAuth2.0 provider the `access_token` is generated. For example:
+`http://localhost:3000/api/upload?access_token=ab.cd123efg45678hij&from=google`
+
+At the moment the `from` parameter is not required, because only Google is supported.
 
 ### Running the API
 
