@@ -3,6 +3,7 @@
  */
 
 var express = require('express')
+  , fs = require('fs')
   , path = require('path')
   , favicon = require('serve-favicon')
   , logger = require('morgan')
@@ -12,9 +13,26 @@ var express = require('express')
   , multer = require('multer')
   , cors = require('cors')
   , _ = require('lodash')
-  , swagger = require('swagspress');
+  , mongoose = require('mongoose')
+  , swagger = require('swagspress')
+  , config = require('config');
 
 module.exports = function(app) {
+
+  // Connect to mongodb
+  var connect = function () {
+    var options = { server: { socketOptions: { keepAlive: 1 } } };
+    mongoose.connect(config.db, options);
+  };
+  connect();
+
+  mongoose.connection.on('error', console.log);
+  //mongoose.connection.on('disconnected', connect);
+
+  // Bootstrap models
+  fs.readdirSync(__dirname + '/models').forEach(function (file) {
+    if (~file.indexOf('.js')) require(__dirname + '/models/' + file);
+  });
 
   app.use(cors());
   // view engine setup

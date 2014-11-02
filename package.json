@@ -20,7 +20,9 @@
     "multer": "~0.1.6",
     "bluebird": "~2.3.6",
     "method-override": "~2.3.0",
-    "swagspress": "git://github.com/51seven/swagspress"
+    "swagspress": "git://github.com/51seven/swagspress",
+    "mongoose": "~3.8.18",
+    "config": "~1.7.0"
   },
   "devDependencies": {
     "supertest": "~0.14.0",

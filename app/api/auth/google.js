@@ -3,7 +3,11 @@
  */
 
 var _ = require('lodash')
-  , https = require('https');
+  , https = require('https')
+  , Promise = require('bluebird')
+  , mongoose = require('mongoose');
+
+var User = mongoose.model('User');
 
 /**
  * Forbidden Error
@@ -14,6 +18,57 @@ var Forbidden = function(message) {
   var err = new Error(message);
   err.status = 403;
   return err;
+}
+
+function askGoogle(access_token) {
+  return new Promise(function(resolve, reject) {
+    https.get({ host: 'www.googleapis.com', path: '/oauth2/v1/tokeninfo?access_token=' + access_token }, function(res) {
+      var body = '';
+
+      res.on('data', function(chunk) {
+        body += chunk;
+      });
+      res.on('end', function() {
+        var resJSON = JSON.parse(body);
+        if(resJSON.error === 'invalid_token') {
+          reject(new Forbidden('Invalid access token'));
+        } else {
+          resolve(resJSON);
+        }
+      });
+    }).on('error', function(err) {
+      reject(new Forbidden('Error when accessing googleapis'));
+    });
+  });
+}
+
+// TODO:
+// This is so redundant, extract it as a function
+
+function getUserData(user_id, access_token) {
+  return new Promise(function(resolve, reject) {
+    https.get({
+      host: 'www.googleapis.com',
+      path: '/plus/v1/people/' + user_id,
+      headers: { 'Authorization': 'Bearer ' + access_token }
+    }, function(res) {
+      var body = '';
+
+      res.on('data', function(chunk) {
+        body += chunk;
+      });
+      res.on('end', function() {
+        var resJSON = JSON.parse(body);
+        if(resJSON.error === 'invalid_token') {
+          reject(new Forbidden('Invalid access token'));
+        } else {
+          resolve(resJSON);
+        }
+      });
+    }).on('error', function(err) {
+      reject(new Forbidden('Error when accessing googleapis'));
+    });
+  });
 }
 
 module.exports = function(req, res, next) {
@@ -29,24 +84,29 @@ module.exports = function(req, res, next) {
     return next(new Forbidden('An access_token is required to access the API.'));
   }
 
-  https.get({ host: 'www.googleapis.com', path: '/oauth2/v1/tokeninfo?access_token=' + access_token }, function(res) {
-    var body = '';
+  var tokenInfo;
 
-    res.on('data', function(chunk) {
-      body += chunk;
-    });
-    res.on('end', function() {
-      var resJSON = JSON.parse(body);
-      if(resJSON.error === 'invalid_token') {
-        return next(new Forbidden('Invalid access token'));
-      } else {
-        return next();
-      }
-    });
-  }).on('error', function(err) {
-    return next(new Forbidden('Error when accessing googleapis'));
+  askGoogle(access_token).then(function(token) {
+    tokenInfo = token;
+    // TODO:
+    // if audience !== allowed client
+    //   throw new Error
+
+    return User.checkExistence({ id: token.user_id, provider: 'google' });
+  }).then(function(check) {
+    if(check) {
+      req.user = check;
+      return;
+    } else {
+      return getUserData(tokenInfo.user_id, access_token);
+    }
+  }).then(function(userdata) {
+    if(userdata) return User.create({ email: tokenInfo.email, id: tokenInfo.user_id, provider: 'google', name: userdata.displayName });
+    else return;
+  }).then(function(createdUser) {
+    if(createdUser) req.user = createdUser;
+    next();
+  }).catch(function(err) {
+    next(err);
   });
-
-
-
 }
