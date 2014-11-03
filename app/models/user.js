@@ -25,53 +25,75 @@ var UserSchema = new Schema({
   externalId: {
     type: String,
     required: true
+  },
+  imageUrl: {
+    type: String
   }
 });
 
 /**
- * Methods
+ * Statics
  */
 
 UserSchema.statics = {
   /**
-   * check existence of user
-   * rejecting is possibly a db error
-   *
-   * @param {Object} opts { id, provider }
-   * @return {Promise}
-   */
-  checkExistence: function(opts) {
-    var query = this.findOne({ 'externalId': opts.id, 'provider': opts.provider });
-    return new Promise(function(resolve, reject) {
-      query.exec(function(err, doc) {
-        if(err) reject(err);
-        else resolve(doc);
-      });
-    });
-  },
-
-  /**
    * create a new user
-   * rejecting is possibly a mail address, which is already in the db
+   * rejecting is possibly a not-unique email address or a db error
    *
    * @param {Object} opts { name, email, provider, id }
    * @return {Promise}
    */
-  create: function(opts) {
-    var newUser = new User({
-      name: opts.name,
-      email: opts.email,
-      provider: opts.provider,
-      externalId: opts.id
-    });
+  createOrUpdate: function(opts) {
+    var self = this;
     return new Promise(function(resolve, reject) {
-      newUser.save(function(err, user) {
+      self.findOne({ provider: opts.provider, externalId: opts.externalId }, function(err, doc) {
         if(err) reject(err);
-        else resolve(user);
+
+        // user exists = update image
+        else if(doc) {
+          self.findOneAndUpdate({ _id: mongoose.Types.ObjectId(doc._id) }, { imageUrl: opts.imageUrl }, function(err, doc) {
+            if(err) reject(err);
+            else resolve(doc);
+          });
+        }
+
+        // new user = save all data
+        else {
+          var newUser = new User({
+            name: opts.name,
+            email: opts.email,
+            provider: opts.provider,
+            externalId: opts.externalId,
+            imageUrl: opts.imageUrl
+          });
+
+          newUser.save(function(err, doc) {
+            if(err) reject(err);
+            else resolve(doc);
+          })
+        }
       });
     });
   }
 }
+
+/**
+ * Virtuals
+ */
+
+UserSchema.virtual('response')
+.get(function() {
+  return {
+    id: this._id,
+    name: this.name,
+    email: this.email,
+    image: this.imageUrl,
+    oauth: {
+      provider: this.provider,
+      id: this.externalId
+    }
+  }
+})
 
 mongoose.model('User', UserSchema);
 var User = mongoose.model('User');
