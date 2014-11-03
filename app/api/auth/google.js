@@ -65,7 +65,7 @@ module.exports = function(req, res, next) {
   else access_token = req.param('access_token');
 
   if (access_token === undefined) {
-    return next(new Forbidden('An access_token is required to access the API.'));
+    return next(new Forbidden('An access_token is required to access the API'));
   }
 
   var tokenInfo, userInfo;

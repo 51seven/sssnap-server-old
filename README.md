@@ -29,7 +29,7 @@ Milestones
 - [ ] The client can upload a file
 - [x] The API answers with a good and meaningful response
 - [x] The API is only accessible with a private key
-- [ ] The server registers a new user
+- [x] The server registers a new user
 
 [travis-image]: http://img.shields.io/travis/51seven/sssnap-server.svg?style=flat
 [travis-url]: https://travis-ci.org/51seven/sssnap-server

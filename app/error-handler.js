@@ -25,6 +25,7 @@ module.exports = function(app) {
       }
       else {
         res.send({
+          error: err.status,
           message: err.message,
           info: err
         });
@@ -44,6 +45,7 @@ module.exports = function(app) {
     }
     else {
       res.send({
+        error: err.status,
         message: err.message
       });
     }
