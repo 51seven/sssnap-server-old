@@ -3,52 +3,14 @@
  */
 
 var _ = require('lodash')
-  , https = require('https')
   , Promise = require('bluebird')
   , mongoose = require('mongoose');
 
+var google = require('../../helper/google')
+  , status = require('../../helper/status');
+
 var User = mongoose.model('User');
 
-/**
- * Forbidden Error
- * @param {message} message Message to pass to error
- * @return {Error}  Error Object with status 403
- */
-var Forbidden = function(message) {
-  var err = new Error(message);
-  err.status = 403;
-  return err;
-}
-
-function googleAPI(path, access_token) {
-  return new Promise(function(resolve, reject) {
-    https.get({
-      host: 'www.googleapis.com',
-      path: path,
-      headers: { 'Authorization': 'Bearer ' + access_token }
-    }, function(res) {
-      var body = '';
-
-      // Collect received body chunks
-      res.on('data', function(chunk) {
-        body += chunk;
-      });
-
-      // parse received body as JSON
-      res.on('end', function() {
-        var resJSON = JSON.parse(body);
-        if(resJSON.error === 'invalid_token') {
-          reject(new Forbidden('Invalid access token'));
-        } else {
-          resolve(resJSON);
-        }
-      });
-
-    }).on('error', function(err) {
-      reject(new Forbidden('Error when accessing googleapis'));
-    });
-  });
-}
 
 module.exports = function(req, res, next) {
   // Skip authentication in a no-production environment
@@ -65,12 +27,12 @@ module.exports = function(req, res, next) {
   else access_token = req.param('access_token');
 
   if (access_token === undefined) {
-    return next(new Forbidden('An access_token is required to access the API'));
+    return next(new status.Forbidden('An access_token is required to access the API'));
   }
 
-  var tokenInfo, userInfo;
+  var tokenInfo;
 
-  googleAPI('/oauth2/v1/tokeninfo?access_token=' + access_token, access_token).then(function(token) {
+  google.callAPI('/oauth2/v1/tokeninfo?access_token=' + access_token, access_token).then(function(token) {
     tokenInfo = token;
 
     // TODO:
@@ -84,20 +46,17 @@ module.exports = function(req, res, next) {
       throw new Forbidden('userinfo.email and plus.me scope is required');
     }
 
-    // Retreive user info
-    return googleAPI('/plus/v1/people/' + tokenInfo.user_id, access_token);
-  }).then(function(user) {
-    userInfo = user;
-
-    var imageUrl = userInfo.image.url;
-
-    userInfo.image.url = imageUrl.substring(0, imageUrl.length - 6);
-
-    // Create new user or update the image of an existing user
-    return User.createOrUpdate({ imageUrl: userInfo.image.url, email: tokenInfo.email, externalId: tokenInfo.user_id, name: userInfo.displayName, provider: 'google'});
+    // Get user from db
+    return User.load({ criteria: { externalId: tokenInfo.user_id, provider: 'google' } });
   }).then(function(user) {
     // Saving the user in the current request
     req.user = user.response;
+    req.user.token_info = tokenInfo;
+    req.user.access_token = access_token;
+
+    if(req.route.path !== '/api/user' && req.user === undefined) {
+      throw new status.Forbidden('User is not known in database');
+    }
 
     next();
   }).catch(function(err) {

@@ -74,6 +74,17 @@ UserSchema.statics = {
         }
       });
     });
+  },
+
+  load: function (options, cb) {
+    var query = this.findOne(options.criteria);
+    if(options.select) query.select(options.select);
+    return new Promise(function(resolve, reject) {
+      query.exec(function(err, doc) {
+        if(err) reject(err);
+        else resolve(doc);
+      });
+    });
   }
 }
 
