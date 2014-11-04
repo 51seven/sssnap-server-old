@@ -43,14 +43,14 @@ module.exports = function(req, res, next) {
     var scopes = tokenInfo.scope.split(' ');
 
     if(scopes.indexOf('https://www.googleapis.com/auth/plus.me') === -1 || scopes.indexOf('https://www.googleapis.com/auth/userinfo.email') === -1) {
-      throw new Forbidden('Access token has wrong scopes. userinfo.email and plus.me scope is required.');
+      throw new status.Forbidden('Access token has wrong scopes. userinfo.email and plus.me scope is required.');
     }
 
     // Get user from db
     return User.load({ criteria: { externalId: tokenInfo.user_id, provider: 'google' } });
   }).then(function(user) {
     // Saving the user in the current request
-    if(req.user) req.user = user.response;
+    if(user) req.user = user.response;
     else req.user = {};
 
     req.user.token_info = tokenInfo;

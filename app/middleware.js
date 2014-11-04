@@ -15,7 +15,8 @@ var express = require('express')
   , _ = require('lodash')
   , mongoose = require('mongoose')
   , swagger = require('swagspress')
-  , config = require('config');
+  , config = require('config')
+  , autoReap = require('multer-autoreap');;
 
 module.exports = function(app) {
 
@@ -47,6 +48,9 @@ module.exports = function(app) {
   // stores incoming files in /uploads/temp
   // controllers do have to delete these temporary files
   app.use(multer({ dest: './uploads/temp'}));
+
+  // Delete file when request is done
+  app.use(autoReap);
 
   // bodyParser parses application/*
   app.use(bodyParser.json());

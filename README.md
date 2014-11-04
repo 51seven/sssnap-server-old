@@ -26,7 +26,7 @@ Milestones
 **1st Milestone (started 21/17/2014)**  
 (_also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_)
 
-- [ ] The client can upload a file
+- [x] The client can upload a file
 - [x] The API answers with a good and meaningful response
 - [x] The API is only accessible with a private key
 - [x] The server registers a new user

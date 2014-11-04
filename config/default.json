@@ -1,3 +1,4 @@
 {
-  "db": "mongodb://localhost/sssnap"
+  "db": "mongodb://localhost/sssnap",
+  "host": "https://localhost:3000"
 }
