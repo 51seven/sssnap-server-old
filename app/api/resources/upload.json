@@ -15,13 +15,6 @@
           "description": "File to store",
           "required": true,
           "type": "file"
-        },
-        {
-          "name": "userid",
-          "in": "formData",
-          "description": "Unique identifier of an user",
-          "required": true,
-          "type": "string"
         }
       ],
       "responses": {
