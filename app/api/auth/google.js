@@ -27,7 +27,7 @@ module.exports = function(req, res, next) {
   else access_token = req.param('access_token');
 
   if (access_token === undefined) {
-    return next(new status.Forbidden('An access_token is required to access the API'));
+    return next(new status.Forbidden('Access token not found. Send the access token in the HTTP Authorization Header or in the URL.'));
   }
 
   var tokenInfo;
@@ -43,7 +43,7 @@ module.exports = function(req, res, next) {
     var scopes = tokenInfo.scope.split(' ');
 
     if(scopes.indexOf('https://www.googleapis.com/auth/plus.me') === -1 || scopes.indexOf('https://www.googleapis.com/auth/userinfo.email') === -1) {
-      throw new Forbidden('userinfo.email and plus.me scope is required');
+      throw new Forbidden('Access token has wrong scopes. userinfo.email and plus.me scope is required.');
     }
 
     // Get user from db
@@ -57,7 +57,7 @@ module.exports = function(req, res, next) {
     req.user.access_token = access_token;
 
     if(req.route.path !== '/api/user' && req.user === undefined) {
-      throw new status.Forbidden('User is not known in database');
+      throw new status.Forbidden('User is not yet in the database. Authorization was successful. Call /api/user to authenticate the user.');
     }
 
     next();

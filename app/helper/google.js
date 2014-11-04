@@ -21,14 +21,14 @@ exports.callAPI = function(path, access_token) {
       res.on('end', function() {
         var resJSON = JSON.parse(body);
         if(resJSON.error === 'invalid_token') {
-          reject(new status.Forbidden('Invalid access token'));
+          reject(new status.Forbidden('Invalid or expired access token.'));
         } else {
           resolve(resJSON);
         }
       });
 
     }).on('error', function(err) {
-      reject(new status.Forbidden('Error when accessing googleapis'));
+      reject(new status.Forbidden('An error is encountered during the request to www.googleapis.com. This will most likely be an error on TCP level.'));
     });
   });
 }
