@@ -1,9 +1,18 @@
 #!/usr/bin/env node
 var debug = require('debug')('sssnap-server');
 var app = require('../app');
+var https = require('https');
+var fs = require('fs');
 
 app.set('port', process.env.PORT || 3000);
 
-var server = app.listen(app.get('port'), function() {
+var options = {
+  key: fs.readFileSync('./bin/ssl/server.key'),
+  cert: fs.readFileSync('./bin/ssl/server.crt')
+};
+
+var server = https.createServer(options, app).listen(app.get('port'));
+
+/*var server = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
-});
+});*/
