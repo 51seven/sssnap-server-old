@@ -50,7 +50,9 @@ module.exports = function(req, res, next) {
     return User.load({ criteria: { externalId: tokenInfo.user_id, provider: 'google' } });
   }).then(function(user) {
     // Saving the user in the current request
-    req.user = user.response;
+    if(req.user) req.user = user.response;
+    else req.user = {};
+
     req.user.token_info = tokenInfo;
     req.user.access_token = access_token;
 

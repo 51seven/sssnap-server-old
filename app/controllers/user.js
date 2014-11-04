@@ -6,17 +6,22 @@ var google = require('../helper/google')
 
 var User = mongoose.model('User');
 
-exports.getUser = function(req, res) {
+exports.getUser = function(req, res, next) {
 
   var tokenInfo = req.user.token_info;
   var access_token = req.user.access_token;
 
+
   google.callAPI('/plus/v1/people/' + tokenInfo.user_id, access_token)
   .then(function(userInfo) {
-    var imageUrl = userInfo.image.url;
-    userInfo.image.url = imageUrl.substring(0, imageUrl.length - 6);
+    if(userInfo.error) {
+      throw new status.Forbidden(userInfo.error.message);
+    }
 
-    return User.createOrUpdate({ imageUrl: userInfo.image.url, email: tokenInfo.email, externalId: tokenInfo.user_id, name: userInfo.displayName, provider: 'google'});
+    var imageUrl = userInfo.image.url;
+    imageUrl = imageUrl.substring(0, imageUrl.length - 6);
+
+    return User.createOrUpdate({ imageUrl: imageUrl, email: tokenInfo.email, externalId: tokenInfo.user_id, name: userInfo.displayName, provider: 'google'});
   }).then(function(user) {
     req.user = user.response;
     res.send(req.user);
