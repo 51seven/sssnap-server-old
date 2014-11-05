@@ -16,8 +16,23 @@ module.exports = function(req, res, next) {
   // Skip authentication in a no-production environment
   // Start in production with NODE_ENV=production npm start (or nodemon or whatever)
   if(process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+    var fakeUser = {
+      id: "5458d76693acaa3d0c0c0015",
+      name: "John Doe",
+      email: "johndoe@gmail.com",
+      image: "https://lh3.googleusercontent.com/-Sa9kdnhuE5E/AAAAAAAAAAI/AAAAAAAAABs/ILmJ8_sk9aY/photo.jpg",
+      oauth: {
+        provider: "google",
+        id: 1234567890
+      }
+    }
+    req.user = fakeUser;
     return next();
   }
+
+  // This works.
+  // Trust me.
+  // I wrote it in Node.js
 
   var access_token;
   var headerAuth = req.get('Authorization');
@@ -35,9 +50,9 @@ module.exports = function(req, res, next) {
   google.callAPI('/oauth2/v1/tokeninfo?access_token=' + access_token, access_token).then(function(token) {
     tokenInfo = token;
 
-    // TODO:
-    // if audience !== allowed client
-    //   throw new Error
+    if(tokenInfo.audience ==! '407408718192.apps.googleusercontent.com' || tokenInfo.audience ==! '947766948-22hqf8ngu94rmepn5m0ucp5a6mo4jsak.apps.googleusercontent.com') {
+      return next(new status.Forbidden('Client not authorized. You have to use an authorized client in order to access the API.'));
+    }
 
     // Check correct scopes
     var scopes = tokenInfo.scope.split(' ');
