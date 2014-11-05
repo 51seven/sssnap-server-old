@@ -62,7 +62,7 @@ UploadSchema.statics = {
         mimetype: opts.mimetype,
         size: opts.size,
         destination: opts.destination,
-        shortlink: config.host + '/' + shortlink
+        shortlink: shortlink
       });
 
       newUpload.save(function(err, doc) {
@@ -105,7 +105,7 @@ UploadSchema.virtual('response')
     id: this._id,
     userid: this._userid,
     title: this.title,
-    shortlink: this.shortlink,
+    shortlink: config.host + '/' + this.shortlink,
     size: this.size,
     mimetype: this.mimetype
   }

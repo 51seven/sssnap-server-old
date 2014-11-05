@@ -64,3 +64,13 @@ exports.newUpload = function(req, res, next) {
     res.send(upload.response);
   });
 }
+
+exports.show = function(req, res, next) {
+  var shortlink = req.param('shortlink');
+  Upload.load({ criteria: { shortlink: shortlink }})
+  .then(function(doc) {
+    var img = fs.readFileSync(doc.destination);
+    res.writeHead(200, {'Content-Type': doc.mimetype });
+    res.end(img, 'binary');
+  });
+}
