@@ -1,31 +1,36 @@
 # sssnap Server [![Build Status][travis-image]][travis-url] [![Test Coverage][coveralls-image]][coveralls-url] [![Dependency Status][dependency-image]][dependency-url]
 
-Written in node.js with use of express.js.  
-This server offers a RESTful API for the [sssnap OSX Client](https://github.com/51seven/sssnap-osx-v2/blob/master/README.md).
+Written in node.js with use of express.js (and some kind of own swagger interpretation).
 
 ### Functionality
 
-In the sssnap client the user will log in with Google (or an other OAuth2.0 provider). After logging in the client calls an API route to get more informations about the user. This route is used to register new users.  
-The API will only be accessible with an `access_token` from an OAuth2.0 provider. The `access_token` is added together with a `from` parameter to the called URL. The `from` parameter tells the server from which OAuth2.0 provider the `access_token` is generated. For example:
-`http://localhost:3000/api/upload?access_token=ab.cd123efg45678hij&from=google`
+The server provides an API which authorizes an user with OAuth2.0. The API has to be **fast** and **secure**.  
+Also the server provides a frontend for the user.
 
-At the moment the `from` parameter is not required, because only Google is supported.
+Visit the [Wiki](https://github.com/51seven/sssnap-server/wiki) to learn how use the API.
 
-### Running the API
+### Requirements
+
+- node.js
+- mongodb
+
+### Running the server
 
 `npm start` Start in development environment  
 `npm run production` Start in production environment
 
-### Production
-
-For more information about the development procedure consider visiting the [sssnap OSX Client](https://github.com/51seven/sssnap-osx-v2/blob/master/README.md#production).
-
 Milestones
 ----------
 
-**1st Milestone (started 21/17/2014)**  
-(_also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_)
+_also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_
 
+**v0.1.0 (started 2014-11-07)**  
+- [ ] The API lists uploaded files with skip and limits
+- [ ] The API lists more informations about the user
+- [ ] The user can view an upload in the browser
+- [ ] Every view of an upload increases a counter
+
+**1st Milestone (started 2014-10-21) (closed 2014-11-05)**  
 - [x] The client can upload a file
 - [x] The API answers with a good and meaningful response
 - [x] The API is only accessible with a private key
