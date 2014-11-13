@@ -93,13 +93,34 @@ UploadSchema.statics = {
     });
   },
 
-  load: function (options, cb) {
+  load: function (options) {
     var query = this.findOne(options.criteria);
     if(options.select) query.select(options.select);
     return new Promise(function(resolve, reject) {
       query.exec(function(err, doc) {
         if(err) reject(err);
         else resolve(doc);
+      });
+    });
+  },
+
+  loadAll: function (options) {
+    var query = this.find(options.criteria);
+    if(options.select) query.select(options.select);
+    return new Promise(function(resolve, reject) {
+      query.exec(function(err, doc) {
+        if(err) reject(err);
+        else resolve(doc);
+      });
+    });
+  },
+
+  count: function (condition) {
+    var query = this.where(condition);
+    return new Promise(function(resolve, reject) {
+      query.count(function(err, count) {
+        if(err) reject(err);
+        else resolve(count);
       });
     });
   }

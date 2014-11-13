@@ -1,6 +1,8 @@
 var mongoose = require('mongoose')
   , Promise = require('bluebird');
 
+var Upload = mongoose.model('Upload');
+
 var Schema = mongoose.Schema;
 
 /**
@@ -94,17 +96,23 @@ UserSchema.statics = {
 
 UserSchema.virtual('response')
 .get(function() {
+  var counter = this.counter;
   return {
     id: this._id,
     name: this.name,
     email: this.email,
     image: this.imageUrl,
+    info: {
+      count: 0,
+      used: 0
+    },
     oauth: {
       provider: this.provider,
       id: this.externalId
     }
   }
-})
+});
+
 
 mongoose.model('User', UserSchema);
 var User = mongoose.model('User');

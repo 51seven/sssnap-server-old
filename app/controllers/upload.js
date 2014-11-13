@@ -51,8 +51,11 @@ exports.newUpload = function(req, res, next) {
 
   var encryptFile = Promise.promisify(encryptor.encryptFile);
 
+  // Make userdir, if it doesn't exist
   p_mkdirp(userdir)
   .then(function(dir) {
+    // Create new document in upload model
+    //
     return Upload.create({
       userid: req.user.id,
       title: req.files.file.originalname,
@@ -64,6 +67,9 @@ exports.newUpload = function(req, res, next) {
   })
   .then(function(upl) {
     upload = upl;
+
+    // encrypt the temporary file using AES256 and
+    // save the encrypted file in the userdir
     return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
   .then(function() {
@@ -76,6 +82,8 @@ exports.newUpload = function(req, res, next) {
 
 exports.show = function(req, res, next) {
   var shortlink = req.param('shortlink');
+
+  // Get upload based on shortlink
   Upload.load({ criteria: { shortlink: shortlink }})
   .then(function(doc) {
     res.render('view', { image: doc.response.info.publicUrl})
