@@ -64,7 +64,7 @@ exports.newUpload = function(req, res, next) {
   })
   .then(function(upl) {
     upload = upl;
-    encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
+    return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
   .then(function() {
     res.send(upload.response);
