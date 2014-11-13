@@ -1,7 +1,10 @@
 var mkdirp = require('mkdirp')
   , path = require('path')
+  , status = require('../helper/status')
   , Promise = require('bluebird')
   , fs = require('fs')
+  , encryptor = require('file-encryptor')
+  , config = require('config')
   , mongoose = require('mongoose');
 
 var Upload = mongoose.model('Upload');
@@ -46,6 +49,8 @@ exports.newUpload = function(req, res, next) {
   var dest = path.join(userdir, req.files.file.name);
   var upload;
 
+  var encryptFile = Promise.promisify(encryptor.encryptFile);
+
   p_mkdirp(userdir)
   .then(function(dir) {
     return Upload.create({
@@ -53,15 +58,19 @@ exports.newUpload = function(req, res, next) {
       title: req.files.file.originalname,
       mimetype: req.files.file.mimetype,
       size: req.files.file.size,
-      destination: dest
+      destination: dest,
+      filename: req.files.file.name
     });
   })
   .then(function(upl) {
     upload = upl;
-    return p_copyFile(source, dest);
+    encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
-  .then(function(tar) {
+  .then(function() {
     res.send(upload.response);
+  })
+  .catch(function(err) {
+    next('Unknown error when processing upload.');
   });
 }
 
@@ -69,8 +78,9 @@ exports.show = function(req, res, next) {
   var shortlink = req.param('shortlink');
   Upload.load({ criteria: { shortlink: shortlink }})
   .then(function(doc) {
-    var img = fs.readFileSync(doc.destination);
-    res.writeHead(200, {'Content-Type': doc.mimetype });
-    res.end(img, 'binary');
+    res.render('view', { image: doc.response.info.publicUrl})
+  })
+  .catch(function(err) {
+    next();
   });
 }

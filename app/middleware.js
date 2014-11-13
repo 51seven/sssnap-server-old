@@ -3,6 +3,7 @@
  */
 
 var express = require('express')
+  , swig = require('swig')
   , fs = require('fs')
   , path = require('path')
   , favicon = require('serve-favicon')
@@ -37,8 +38,11 @@ module.exports = function(app) {
 
   app.use(cors());
   // view engine setup
+  app.engine('html', swig.renderFile);
   app.set('views', path.join(__dirname, './views'));
-  app.set('view engine', 'jade');
+  app.set('view engine', 'html');
+  app.set('view cache', false);
+  swig.setDefaults({ cache: config.express.cacheView });
 
   // uncomment after placing your favicon in /public
   //app.use(favicon(__dirname + '/public/favicon.ico'));

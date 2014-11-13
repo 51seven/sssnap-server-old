@@ -1,4 +1,14 @@
 {
   "db": "mongodb://localhost/sssnap",
-  "host": "https://localhost:3000"
+  "host": "https://localhost:3000",
+  "secret": {
+    "signkey": "abc123"
+  },
+  "aes": {
+    "algorithm": "aes256",
+    "key": "098xyz"
+  },
+  "express": {
+    "cacheView": false
+  }
 }

@@ -1,5 +1,6 @@
 var mongoose = require('mongoose')
   , Promise = require('bluebird')
+  , hmac = require('../helper/hmac')
   , config = require('config');
 
 var Schema = mongoose.Schema;
@@ -34,6 +35,10 @@ var UploadSchema = new Schema({
     type: Number,
     required: true
   },
+  filename: {
+    type: String,
+    required: true
+  },
   destination: {
     type: String,
     required: true,
@@ -43,6 +48,10 @@ var UploadSchema = new Schema({
     type: String,
     required: true,
     unique: true
+  },
+  views: {
+    type: Number,
+    default: 0
   }
 });
 
@@ -62,7 +71,8 @@ UploadSchema.statics = {
         mimetype: opts.mimetype,
         size: opts.size,
         destination: opts.destination,
-        shortlink: shortlink
+        shortlink: shortlink,
+        filename: opts.filename
       });
 
       newUpload.save(function(err, doc) {
@@ -96,6 +106,19 @@ UploadSchema.statics = {
 }
 
 /**
+ * Methods
+ */
+
+UploadSchema.methods = {
+  generatePublicURL: function(destination, userid, filename) {
+    var time = new Date();
+    var signature = hmac.createSignature(destination, userid, filename, time);
+    var url = hmac.generateURL(signature, userid, filename, time);
+    return url;
+  }
+}
+
+/**
  * Virtuals
  */
 
@@ -106,8 +129,12 @@ UploadSchema.virtual('response')
     userid: this._userid,
     title: this.title,
     shortlink: config.host + '/' + this.shortlink,
-    size: this.size,
-    mimetype: this.mimetype
+    views: this.views,
+    info: {
+      publicUrl: this.generatePublicURL(this.destination, this._userid, this.filename),
+      size: this.size,
+      mimetype: this.mimetype
+    }
   }
 });
 
