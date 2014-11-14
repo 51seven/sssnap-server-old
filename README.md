@@ -26,7 +26,7 @@ _also see [https://github.com/51seven/sssnap-server/milestones?state=open](https
 
 **v0.1.x Improvement (started 2014-11-14)**  
 - [ ] Code cleaning
-- [ ] Refactoring stuff
+- [x] Refactoring stuff
 - [ ] Mongoose Schema improvement
 - [ ] Swagger resources in controller
 - [ ] Commenting
