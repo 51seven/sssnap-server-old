@@ -1,59 +1,38 @@
-var mkdirp = require('mkdirp')
+var fs = require('fs')
   , path = require('path')
-  , status = require('../helper/status')
-  , Promise = require('bluebird')
-  , fs = require('fs')
-  , encryptor = require('file-encryptor')
-  , config = require('config')
   , _ = require('lodash')
+  , config = require('config')
+  , Promise = require('bluebird')
+  , mkdirp = require('mkdirp')
+  , encryptor = require('file-encryptor')
   , mongoose = require('mongoose');
+var status = require('../helpers/status');
 
 var Upload = mongoose.model('Upload');
 
-function p_mkdirp(dir) {
-  return new Promise(function(resolve, reject) {
-    mkdirp(dir, function(err) {
-      if(err) reject(err);
-      else resolve(dir);
-    });
-  });
-}
-
-// from http://stackoverflow.com/a/21995878/2376069
-function p_copyFile(source, target) {
-  return new Promise(function(resolve, reject) {
-    var cbCalled = false;
-
-    var rd = fs.createReadStream(source);
-    rd.on("error", done);
-
-    var wr = fs.createWriteStream(target);
-    wr.on("error", done);
-    wr.on("close", function(ex) {
-      done();
-    });
-    rd.pipe(wr);
-
-    function done(err) {
-      if(!cbCalled) {
-        if(err) reject(err);
-        else resolve(target);
-        cbCalled = true;
-      }
-    }
-  });
-}
-
-exports.new = function(req, res, next) {
+/**
+ * This upload routine does:
+ *  * create a userdir if necessary
+ *  * create a new database entry
+ *  * encrypt the received file
+ *  * save the received file in the userdir
+ *
+ * @returns Single Upload Object
+ *
+ * TODO: encryption key per uploaded file
+ * TODO: catch -> delete saved file, delete created db entry
+ */
+exports.post = function(req, res, next) {
   var userdir = path.join(__dirname, '../../uploads/'+req.user.id);
   var source = path.join(__dirname, '../../'+req.files.file.path);
   var dest = path.join(userdir, req.files.file.name);
   var upload;
 
   var encryptFile = Promise.promisify(encryptor.encryptFile);
+  var mkdir = Promise.promisify(mkdirp);
 
   // Make userdir, if it doesn't exist
-  p_mkdirp(userdir)
+  mkdir(userdir)
   .then(function(dir) {
     // Create new document in upload model
 
@@ -81,6 +60,11 @@ exports.new = function(req, res, next) {
   });
 }
 
+/**
+ * list all uploads of an user
+ *
+ * @returns Array of Upload Objects
+ */
 exports.list = function(req, res, next) {
   Upload.loadAll({ criteria: { _userid: req.user.id }, limit: req.param('limit'), skip: req.param('skip')}).then(function(docs) {
     var response = _.map(docs, function(doc) { return doc.response });
@@ -91,6 +75,11 @@ exports.list = function(req, res, next) {
   });
 }
 
+/**
+ * get informations to a single upload
+ *
+ * @returns Single Upload Object
+ */
 exports.get = function(req, res, next) {
   var id = req.param('id');
   Upload.load({ criteria: { _id: id }}).then(function(doc) {
@@ -101,6 +90,9 @@ exports.get = function(req, res, next) {
   });
 }
 
+/**
+ * render the upload view
+ */
 exports.show = function(req, res, next) {
   var shortlink = req.param('shortlink');
 

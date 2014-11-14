@@ -2,31 +2,60 @@
  * Starting point of the express app
  */
 
-var express = require('express');
+var express = require('express')
+  , mongoose = require('mongoose')
+  , fs = require('fs')
+  , config = require('config');
 
-var middleware = require('./app/middleware')
-  , router = require('./app/router')
-  , errorHandler = require('./app/error-handler');
+
+/**
+ * Initialize Database
+ */
+
+// Open connection to mongodb
+var connect = function () {
+  var options = { server: { socketOptions: { keepAlive: 1 } } };
+  mongoose.connect(config.db, options);
+};
+
+connect();
+mongoose.connection.on('error', console.log);
+// This can be good for production
+// mongoose.connection.on('disconnected', connect);
+
+// Bootstrap models
+fs.readdirSync('./app/models').forEach(function (file) {
+  if (~file.indexOf('.js')) require('./app/models/' + file);
+});
+
+
+
+/**
+ * Initialize App
+ */
 
 var app = express();
+
+
+
 
 // Mount the middleware to the express
 // app, e.g. the body parser, logger,
 // view engines, ...
-middleware(app);
+require('./app/middleware')(app);
 
-// The router contains
-//  - all the server URL routes
-//  - the swagger API routes
-router(app);
+// All requests will be passed to the
+// router and `function(req, res)` will
+// do its thing.
+require('./app/router')(app);
 
 // If something is passed through the
 // router, an error occured and will
 // be handled here.
-errorHandler(app);
+require('./app/error-handler')(app);
 
 // After the errorHandler everything
-// is processed.
+// is processed. */
 
 module.exports = app;
 

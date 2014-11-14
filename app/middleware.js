@@ -14,27 +14,10 @@ var express = require('express')
   , multer = require('multer')
   , cors = require('cors')
   , _ = require('lodash')
-  , mongoose = require('mongoose')
-  , swagger = require('swagspress')
   , config = require('config')
   , autoReap = require('multer-autoreap');;
 
 module.exports = function(app) {
-
-  // Connect to mongodb
-  var connect = function () {
-    var options = { server: { socketOptions: { keepAlive: 1 } } };
-    mongoose.connect(config.db, options);
-  };
-  connect();
-
-  mongoose.connection.on('error', console.log);
-  //mongoose.connection.on('disconnected', connect);
-
-  // Bootstrap models
-  fs.readdirSync(__dirname + '/models').forEach(function (file) {
-    if (~file.indexOf('.js')) require(__dirname + '/models/' + file);
-  });
 
   app.use(cors());
   // view engine setup
@@ -66,11 +49,4 @@ module.exports = function(app) {
 
   // override HTTP Verbs, such as PUT and DELETE
   app.use(methodOverride());
-
-  app.use(swagger({
-    doc: path.join(__dirname, 'api/swagger.js'),
-    controller: path.join(__dirname, 'controllers'),
-    auth: path.join(__dirname, 'api/auth')
-  }));
-
 };

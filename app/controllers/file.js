@@ -5,8 +5,8 @@ var fs = require('fs')
   , config = require('config')
   , encryptor = require('file-encryptor');
 
-var hmac = require('../helper/hmac')
-  , status = require('../helper/status');
+var hmac = require('../helpers/hmac')
+  , status = require('../helpers/status');
 
 var Upload = mongoose.model('Upload');
 

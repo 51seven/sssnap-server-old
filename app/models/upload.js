@@ -1,6 +1,6 @@
 var mongoose = require('mongoose')
   , Promise = require('bluebird')
-  , hmac = require('../helper/hmac')
+  , hmac = require('../helpers/hmac')
   , config = require('config');
 
 var Schema = mongoose.Schema;

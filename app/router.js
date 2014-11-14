@@ -3,9 +3,10 @@
  */
 
 var express = require('express');
+var router = require('./routes/');
 
-var index = require('./routes/index');
-
+// This is more or less a simple pass-through
+// to the express.Routers
 module.exports = function(app) {
-  app.use('/', index);
+  app.use('/', router);
 };

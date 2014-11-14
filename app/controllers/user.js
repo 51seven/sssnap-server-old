@@ -1,14 +1,23 @@
 var _ = require('lodash')
   , mongoose = require('mongoose');
 
-var google = require('../helper/google')
-  , status = require('../helper/status');
+var google = require('../helpers/google')
+  , status = require('../helpers/status');
 
 var User = mongoose.model('User');
 var Upload = mongoose.model('Upload');
 
-exports.getUser = function(req, res, next) {
-
+/**
+ * This login/registration routine does:
+ *  * gets informations about the authorized user
+ *  * upsert the user doc
+ *    * onCreate: save all data
+ *    * onUpdate: save just the users profile image
+ *  * gets information about the uploads
+ *
+ * @returns Single User Object
+ */
+exports.get = function(req, res, next) {
   var tokenInfo = req.user.token_info;
   var access_token = req.user.access_token;
 

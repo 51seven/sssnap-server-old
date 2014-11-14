@@ -6,34 +6,13 @@ var _ = require('lodash')
   , Promise = require('bluebird')
   , mongoose = require('mongoose');
 
-var google = require('../../helper/google')
-  , status = require('../../helper/status');
+var google = require('../../helpers/google')
+  , status = require('../../helpers/status');
 
 var User = mongoose.model('User');
 
 
 module.exports = function(req, res, next) {
-  // Skip authentication in a no-production environment
-  // Start in production with NODE_ENV=production npm start (or nodemon or whatever)
-  if(process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
-    var fakeUser = {
-      id: "5458d76693acaa3d0c0c0015",
-      name: "John Doe",
-      email: "johndoe@gmail.com",
-      image: "https://lh3.googleusercontent.com/-Sa9kdnhuE5E/AAAAAAAAAAI/AAAAAAAAABs/ILmJ8_sk9aY/photo.jpg",
-      oauth: {
-        provider: "google",
-        id: 1234567890
-      }
-    }
-    req.user = fakeUser;
-    return next();
-  }
-
-  // This works.
-  // Trust me.
-  // I wrote it in Node.js
-
   var access_token;
   var headerAuth = req.get('Authorization');
 
@@ -71,12 +50,12 @@ module.exports = function(req, res, next) {
     req.user.token_info = tokenInfo;
     req.user.access_token = access_token;
 
-    if(req.route.path !== '/api/user' && req.user === undefined) {
+    if(req.originalUrl !== '/api/user' && req.user === undefined) {
       throw new status.Forbidden('User is not yet in the database. Authorization was successful. Call /api/user to authenticate the user.');
     }
 
-    next();
+    return next();
   }).catch(function(err) {
-    next(err);
+    return next(err);
   });
 }
