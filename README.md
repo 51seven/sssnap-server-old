@@ -25,11 +25,10 @@ Milestones
 _also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_
 
 **v0.1.0 (started 2014-11-13)**  
-- [ ] The API lists uploaded files with skip and limits
+- [x] The API lists uploaded files with skip and limits
 - [x] The API lists more informations about the user
 - [x] The user can view an upload in the browser
 - [x] The uploaded file is being encrypted
-- [ ] Every view of an upload increases a counter
 
 **1st Milestone (started 2014-10-21) (closed 2014-11-05)**  
 - [x] The client can upload a file
