@@ -24,7 +24,15 @@ Milestones
 
 _also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_
 
-**v0.1.0 (started 2014-11-13)**  
+**v0.1.x Improvement (started 2014-11-14)**  
+- [ ] Code cleaning
+- [ ] Refactoring stuff
+- [ ] Mongoose Schema improvement
+- [ ] Swagger resources in controller
+- [ ] Commenting
+- [ ] Testing
+
+**v0.1.0 (started 2014-11-13) (closed 2014-11-14)**  
 - [x] The API lists uploaded files with skip and limits
 - [x] The API lists more informations about the user
 - [x] The user can view an upload in the browser
