@@ -5,6 +5,7 @@ var mkdirp = require('mkdirp')
   , fs = require('fs')
   , encryptor = require('file-encryptor')
   , config = require('config')
+  , _ = require('lodash')
   , mongoose = require('mongoose');
 
 var Upload = mongoose.model('Upload');
@@ -43,7 +44,7 @@ function p_copyFile(source, target) {
   });
 }
 
-exports.newUpload = function(req, res, next) {
+exports.new = function(req, res, next) {
   var userdir = path.join(__dirname, '../../uploads/'+req.user.id);
   var source = path.join(__dirname, '../../'+req.files.file.path);
   var dest = path.join(userdir, req.files.file.name);
@@ -55,7 +56,7 @@ exports.newUpload = function(req, res, next) {
   p_mkdirp(userdir)
   .then(function(dir) {
     // Create new document in upload model
-    //
+
     return Upload.create({
       userid: req.user.id,
       title: req.files.file.originalname,
@@ -77,6 +78,26 @@ exports.newUpload = function(req, res, next) {
   })
   .catch(function(err) {
     next('Unknown error when processing upload.');
+  });
+}
+
+exports.list = function(req, res, next) {
+  Upload.loadAll({ criteria: { _userid: req.user.id }, limit: req.param('limit'), skip: req.param('skip')}).then(function(docs) {
+    var response = _.map(docs, function(doc) { return doc.response });
+    res.send(response);
+  })
+  .catch(function(err) {
+    next(err);
+  });
+}
+
+exports.get = function(req, res, next) {
+  var id = req.param('id');
+  Upload.load({ criteria: { _id: id }}).then(function(doc) {
+    res.send(doc.response);
+  })
+  .catch(function(err) {
+    next(err);
   });
 }
 

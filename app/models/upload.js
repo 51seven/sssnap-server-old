@@ -52,6 +52,10 @@ var UploadSchema = new Schema({
   views: {
     type: Number,
     default: 0
+  },
+  created: {
+    type: Date,
+    default: Date.now
   }
 });
 
@@ -106,6 +110,9 @@ UploadSchema.statics = {
 
   loadAll: function (options) {
     var query = this.find(options.criteria);
+    query.sort({ created: 'asc'})
+    if(options.skip) query.skip(options.skip);
+    if(options.limit) query.limit(options.limit);
     if(options.select) query.select(options.select);
     return new Promise(function(resolve, reject) {
       query.exec(function(err, doc) {
@@ -151,6 +158,7 @@ UploadSchema.virtual('response')
     title: this.title,
     shortlink: config.host + '/' + this.shortlink,
     views: this.views,
+    created: this.created,
     info: {
       publicUrl: this.generatePublicURL(this.destination, this._userid, this.filename),
       size: this.size,
@@ -158,6 +166,8 @@ UploadSchema.virtual('response')
     }
   }
 });
+
+UploadSchema.set('toJSON', { virtuals: true });
 
 mongoose.model('Upload', UploadSchema);
 var Upload = mongoose.model('Upload');

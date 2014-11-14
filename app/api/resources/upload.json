@@ -2,7 +2,7 @@
   "/upload": {
     "post": {
       "x-controller": "upload",
-      "operationId": "newUpload",
+      "operationId": "new",
       "tags": [ ],
       "description": "Stores an uploaded file and saves data about it in the database. Returns data about it.",
       "consumes": [
@@ -17,6 +17,84 @@
           "type": "file"
         }
       ],
+      "responses": {
+        "200": {
+          "description": "Successful request",
+          "schema": {
+            "$ref": "#/definitions/Upload"
+          }
+        },
+        "403": {
+          "description": "Authentication failed",
+          "schema": {
+            "$ref": "#/definitions/Error"
+          }
+        },
+        "default": {
+          "description": "Unexpected error",
+          "schema": {
+            "$ref": "#/definitions/Error"
+          }
+        }
+      }
+    },
+    "get": {
+      "x-controller": "upload",
+      "operationId": "list",
+      "description": "Lists uploaded files.",
+      "parameters": [
+        {
+          "name": "skip",
+          "in": "path",
+          "description": "Number of uploads to skip.",
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "default": 0
+        },
+        {
+          "name": "limit",
+          "in": "path",
+          "description": "Number of upload to return.",
+          "type": "integer",
+          "minimum": 1,
+          "exclusiveMinimum": true,
+          "default": 10
+        },
+        {
+          "name": "start",
+          "in": "path",
+          "description": "ID of upload to start with operation.",
+          "type": "integer"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful request",
+          "schema": {
+            "$ref": "#/definitions/Upload"
+          }
+        },
+        "403": {
+          "description": "Authentication failed",
+          "schema": {
+            "$ref": "#/definitions/Error"
+          }
+        },
+        "default": {
+          "description": "Unexpected error",
+          "schema": {
+            "$ref": "#/definitions/Error"
+          }
+        }
+      }
+    }
+  },
+  "/upload/{id}": {
+    "get": {
+      "x-controller": "upload",
+      "operationId": "get",
+      "description": "Get information about a single upload.",
       "responses": {
         "200": {
           "description": "Successful request",
