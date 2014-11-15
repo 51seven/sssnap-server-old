@@ -1,3 +1,7 @@
+/**
+ * HMAC generation helper
+ */
+
 var crypto = require('crypto')
   , config = require('config');
 
@@ -39,6 +43,6 @@ exports.createSignature = function (destination, userid, filename, time) {
  * @return {String} full URL
  */
 exports.generateURL = function (signature, userid, filename, time) {
-  var url = config.host + '/files-pub/' + signature + '/' + time.getTime() + '/' + userid + '/' + filename;
+  var url = config.host + '/files/pub/' + signature + '/' + time.getTime() + '/' + userid + '/' + filename;
   return url;
 }

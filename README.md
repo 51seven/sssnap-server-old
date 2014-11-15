@@ -25,10 +25,10 @@ Milestones
 _also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_
 
 **v0.1.x Improvement (started 2014-11-14)**  
-- [ ] Code cleaning
+- [x] Code cleaning
 - [x] Refactoring stuff
 - [x] Mongoose Schema improvement
-- [ ] Commenting
+- [x] Commenting
 - [ ] Testing
 
 **v0.1.0 (started 2014-11-13) (closed 2014-11-14)**  

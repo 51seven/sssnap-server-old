@@ -1,6 +1,9 @@
+/**
+ * User controller
+ */
+
 var _ = require('lodash')
   , mongoose = require('mongoose');
-
 var google = require('../helpers/google')
   , status = require('../helpers/status');
 
@@ -45,7 +48,7 @@ exports.get = function(req, res, next) {
     return User.createOrUpdate(newUser);
   }).then(function(user) {
     req.user = user.toObject();
-    res.json(req.user);
+    res.json(user.toObject());
   }).catch(function(err) {
     next(err);
   });

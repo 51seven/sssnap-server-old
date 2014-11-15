@@ -1,11 +1,15 @@
-var fs = require('fs')
+/**
+ * Upload controller
+ */
+
+var _ = require('lodash')
+  , fs = require('fs')
   , path = require('path')
-  , _ = require('lodash')
   , config = require('config')
   , Promise = require('bluebird')
   , mkdirp = require('mkdirp')
-  , encryptor = require('file-encryptor')
-  , mongoose = require('mongoose');
+  , mongoose = require('mongoose')
+  , encryptor = require('file-encryptor');
 var status = require('../helpers/status');
 
 var Upload = mongoose.model('Upload');
@@ -35,7 +39,6 @@ exports.post = function(req, res, next) {
   mkdir(userdir)
   .then(function(dir) {
     // Create new document in upload model
-
     return Upload.create({
       userid: req.user.id,
       title: req.files.file.originalname,
@@ -53,7 +56,7 @@ exports.post = function(req, res, next) {
     return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
   .then(function() {
-    res.send(upload.toObject());
+    res.json(upload.toObject());
   })
   .catch(function(err) {
     next('Unknown error when processing upload.');
@@ -73,7 +76,10 @@ exports.list = function(req, res, next) {
   };
 
   Upload.load(options).then(function(docs) {
+    // docs is an array, and every item in this array is a mongooseDocument
+    // with the method toObject(). We need this toObject() of every document.
     var toObjectDocs = _.map(docs, function(doc) { return doc.toObject(); });
+
     res.json(toObjectDocs);
   })
   .catch(function(err) {
@@ -110,11 +116,14 @@ exports.show = function(req, res, next) {
 
   Upload.load(options)
   .then(function(doc) {
-    if(!doc) throw new Error('not found');
+    // If no doc is found, no shortlink exists
+    // and so that's a 404. We don't want to throw
+    // a error for this, just escape the promise.
+    if(!doc) throw null;
+
     res.render('view', { image: doc.publicUrl })
   })
   .catch(function(err) {
-    if(err.message === 'not found') next();
-    else next(err);
+    next(err);
   });
 }

@@ -1,7 +1,11 @@
+/**
+ * Upload model
+ */
+
 var mongoose = require('mongoose')
   , Promise = require('bluebird')
-  , hmac = require('../helpers/hmac')
   , config = require('config');
+var hmac = require('../helpers/hmac')
 
 var Schema = mongoose.Schema;
 
@@ -83,6 +87,7 @@ UploadSchema.statics = {
         filename: opts.filename
       });
 
+      // TODO: Test this error 11000 fallback
       newUpload.save(function(err, doc) {
         if(err) {
           if(err.code === 11000) {

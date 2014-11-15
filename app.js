@@ -37,8 +37,6 @@ fs.readdirSync('./app/models').forEach(function (file) {
 var app = express();
 
 
-
-
 // Mount the middleware to the express
 // app, e.g. the body parser, logger,
 // view engines, ...

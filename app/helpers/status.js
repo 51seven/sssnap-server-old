@@ -1,4 +1,9 @@
 /**
+ * Error with statuscode helper
+ */
+
+
+/**
  * Forbidden Error
  * @param {message} message Message to pass to error
  * @return {Error}  Error Object with status 403

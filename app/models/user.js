@@ -1,8 +1,11 @@
+/**
+ * User model
+ */
+
 var mongoose = require('mongoose')
   , Promise = require('bluebird');
 
 var Upload = mongoose.model('Upload');
-
 var Schema = mongoose.Schema;
 
 /**

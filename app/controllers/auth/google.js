@@ -5,7 +5,6 @@
 var _ = require('lodash')
   , Promise = require('bluebird')
   , mongoose = require('mongoose');
-
 var google = require('../../helpers/google')
   , status = require('../../helpers/status');
 
@@ -13,7 +12,7 @@ var User = mongoose.model('User');
 
 
 module.exports = function(req, res, next) {
-  var access_token, tokenInfo;
+  var access_token, tokenInfo, scopes;
   var headerAuth = req.get('Authorization');
 
   // Get access token from HTTP Header or from URL parameter
@@ -26,6 +25,7 @@ module.exports = function(req, res, next) {
 
   google.callAPI('/oauth2/v1/tokeninfo?access_token=' + access_token, access_token).then(function(token) {
     tokenInfo = token;
+    scopes = tokenInfo.scope.split(' ');
 
     // Restrict clients
     if(tokenInfo.audience ==! '407408718192.apps.googleusercontent.com' || tokenInfo.audience ==! '947766948-22hqf8ngu94rmepn5m0ucp5a6mo4jsak.apps.googleusercontent.com') {
@@ -33,8 +33,6 @@ module.exports = function(req, res, next) {
     }
 
     // Check correct scopes
-    var scopes = tokenInfo.scope.split(' ');
-
     if(scopes.indexOf('https://www.googleapis.com/auth/plus.me') === -1 || scopes.indexOf('https://www.googleapis.com/auth/userinfo.email') === -1) {
       throw new status.Forbidden('Access token has wrong scopes. userinfo.email and plus.me scope is required.');
     }
