@@ -78,40 +78,46 @@ UserSchema.statics = {
     });
   },
 
-  load: function (options, cb) {
-    var query = this.findOne(options.criteria);
-    if(options.select) query.select(options.select);
+  load: function (options) {
+    var query;
+
+    if(options.findOne) {
+      query = this.findOne(options.where);
+    } else {
+      query = this.find(options.where);
+      query.skip(options.skip);
+      query.limit(options.limit);
+    }
+    if(options.select) {
+      query.select(options.select)
+    }
+
     return new Promise(function(resolve, reject) {
       query.exec(function(err, doc) {
         if(err) reject(err);
         else resolve(doc);
       });
     });
-  }
+  },
 }
 
 /**
- * Virtuals
+ * Options
  */
 
-UserSchema.virtual('response')
-.get(function() {
-  var counter = this.counter;
+if(!UserSchema.options.toObject) UserSchema.options.toObject = {};
+UserSchema.options.toObject.transform = function (doc, ret, options) {
   return {
-    id: this._id,
-    name: this.name,
-    email: this.email,
-    image: this.imageUrl,
-    info: {
-      count: 0,
-      used: 0
-    },
+    id: ret._id,
+    name: ret.name,
+    email: ret.email,
+    image: ret.imageUrl,
     oauth: {
-      provider: this.provider,
-      id: this.externalId
+      provider: ret.provider,
+      id: ret.externalId
     }
   }
-});
+}
 
 
 mongoose.model('User', UserSchema);

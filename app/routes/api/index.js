@@ -10,7 +10,10 @@ var auth = require('../../controllers/auth');
 var user = require('./user');
 var upload = require('./upload');
 
-// Authentication
+// Authorization
+// No matter if the route exists, it will
+// always first ask for authorization. I'm
+// not sure if this is good or bad.
 router.use(auth);
 
 // Subroute mapping

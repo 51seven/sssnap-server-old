@@ -1,14 +1,11 @@
+/**
+ * Authorization provider switch
+ */
+
 var status = require('../../helpers/status');
 
 module.exports = function(req, res, next) {
-  var provider;
-
-  if(req.get('x-auth-provider'))
-    provider = req.get('x-auth-provider');
-  else if(req.query.from)
-    provider = req.query.from;
-  else
-    provider = undefined;
+  var provider = req.get('x-auth-provider') || req.query.provider;
 
   switch(provider) {
     case 'google':

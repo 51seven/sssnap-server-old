@@ -53,7 +53,7 @@ exports.post = function(req, res, next) {
     return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
   .then(function() {
-    res.send(upload.response);
+    res.send(upload.toObject());
   })
   .catch(function(err) {
     next('Unknown error when processing upload.');
@@ -66,9 +66,14 @@ exports.post = function(req, res, next) {
  * @returns Array of Upload Objects
  */
 exports.list = function(req, res, next) {
-  Upload.loadAll({ criteria: { _userid: req.user.id }, limit: req.param('limit'), skip: req.param('skip')}).then(function(docs) {
-    var response = _.map(docs, function(doc) { return doc.response });
-    res.send(response);
+  var options = {
+    where: { _userid: req.user.id },
+    limit: req.param('limit'),
+    skip: req.param('skip')
+  }
+  Upload.load(options).then(function(docs) {
+    var toObjectDocs = _.map(docs, function(doc) { return doc.toObject(); });
+    res.json(toObjectDocs);
   })
   .catch(function(err) {
     next(err);
@@ -81,9 +86,12 @@ exports.list = function(req, res, next) {
  * @returns Single Upload Object
  */
 exports.get = function(req, res, next) {
-  var id = req.param('id');
-  Upload.load({ criteria: { _id: id }}).then(function(doc) {
-    res.send(doc.response);
+  var options = {
+    findOne: true,
+    where: { _id: req.param('upload_id') }
+  };
+  Upload.load(options).then(function(doc) {
+    res.json(doc.toObject());
   })
   .catch(function(err) {
     next(err);
@@ -94,14 +102,18 @@ exports.get = function(req, res, next) {
  * render the upload view
  */
 exports.show = function(req, res, next) {
-  var shortlink = req.param('shortlink');
+  var options = {
+    findOne: true,
+    where: { shortlink: req.param('shortlink') }
+  };
 
-  // Get upload based on shortlink
-  Upload.load({ criteria: { shortlink: shortlink }})
+  Upload.load(options)
   .then(function(doc) {
-    res.render('view', { image: doc.response.info.publicUrl})
+    if(!doc) throw new Error('not found');
+    res.render('view', { image: doc.publicUrl })
   })
   .catch(function(err) {
-    next();
+    if(err.message == 'not found') next();
+    else next(err);
   });
 }
