@@ -70,7 +70,8 @@ exports.list = function(req, res, next) {
     where: { _userid: req.user.id },
     limit: req.param('limit'),
     skip: req.param('skip')
-  }
+  };
+
   Upload.load(options).then(function(docs) {
     var toObjectDocs = _.map(docs, function(doc) { return doc.toObject(); });
     res.json(toObjectDocs);
@@ -113,7 +114,7 @@ exports.show = function(req, res, next) {
     res.render('view', { image: doc.publicUrl })
   })
   .catch(function(err) {
-    if(err.message == 'not found') next();
+    if(err.message === 'not found') next();
     else next(err);
   });
 }
