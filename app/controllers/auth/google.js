@@ -45,7 +45,7 @@ module.exports = function(req, res, next) {
     return User.load(options);
   }).then(function(user) {
     // Saving the user in the current request
-    if(user) req.user = user.toObject();
+    if(user) req.user = user;
     else req.user = {};
 
     req.user.token_info = tokenInfo;

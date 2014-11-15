@@ -21,36 +21,42 @@ var Upload = mongoose.model('Upload');
  * @returns Single User Object
  */
 exports.get = function(req, res, next) {
-  var tokenInfo = req.user.token_info;
-  var access_token = req.user.access_token;
+  if(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    User.createOrUpdate(req.user).then(function(user) {
+      res.json(user.toObject());
+    });
+  }
 
+  else {
+    var tokenInfo = req.user.token_info;
+    var access_token = req.user.access_token;
 
-  google.callAPI('/plus/v1/people/' + tokenInfo.user_id, access_token)
-  .then(function(userInfo) {
-    if(userInfo.error) {
-      throw new status.Forbidden(userInfo.error.message);
-    }
+    google.callAPI('/plus/v1/people/' + tokenInfo.user_id, access_token)
+    .then(function(userInfo) {
+      if(userInfo.error) {
+        throw new status.Forbidden(userInfo.error.message);
+      }
 
-    // save image url
-    var imageUrl = userInfo.image.url;
-    imageUrl = imageUrl.substring(0, imageUrl.length - 6);
+      // save image url
+      var imageUrl = userInfo.image.url;
+      imageUrl = imageUrl.substring(0, imageUrl.length - 6);
 
-    // Create new user, if user doesn't exist
-    // If user exists update profile image
-    var newUser = {
-      imageUrl: imageUrl,
-      email: tokenInfo.email,
-      externalId: tokenInfo.user_id,
-      name: userInfo.displayName,
-      provider: 'google'
-    };
+      // Create new user, if user doesn't exist
+      // If user exists update profile image
+      var newUser = new User({
+        imageUrl: imageUrl,
+        email: tokenInfo.email,
+        externalId: tokenInfo.user_id,
+        name: userInfo.displayName,
+        provider: 'google'
+      });
 
-    return User.createOrUpdate(newUser);
-  }).then(function(user) {
-    req.user = user.toObject();
-    res.json(user.toObject());
-  }).catch(function(err) {
-    next(err);
-  });
+      return User.createOrUpdate(newUser);
+    }).then(function(user) {
+      res.json(user.toObject());
+    }).catch(function(err) {
+      next(err);
+    });
+  }
 
 }

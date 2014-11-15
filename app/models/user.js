@@ -64,15 +64,7 @@ UserSchema.statics = {
 
         // new user = save all data
         else {
-          var newUser = new User({
-            name: opts.name,
-            email: opts.email,
-            provider: opts.provider,
-            externalId: opts.externalId,
-            imageUrl: opts.imageUrl
-          });
-
-          newUser.save(function(err, doc) {
+          opts.save(function(err, doc) {
             if(err) reject(err);
             else resolve(doc);
           })
