@@ -1,5 +1,5 @@
 /**
- * Routes
+ * Route receiver
  */
 
 var express = require('express');

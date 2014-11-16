@@ -1,7 +1,11 @@
+/**
+ * Upload model
+ */
+
 var mongoose = require('mongoose')
   , Promise = require('bluebird')
-  , hmac = require('../helpers/hmac')
   , config = require('config');
+var hmac = require('../helpers/hmac')
 
 var Schema = mongoose.Schema;
 
@@ -13,6 +17,8 @@ var randString = function (len) {
   }
   return result;
 };
+
+
 
 /**
  * Schema
@@ -59,6 +65,8 @@ var UploadSchema = new Schema({
   }
 });
 
+
+
 /**
  * Statics
  */
@@ -79,6 +87,7 @@ UploadSchema.statics = {
         filename: opts.filename
       });
 
+      // TODO: Test this error 11000 fallback
       newUpload.save(function(err, doc) {
         if(err) {
           if(err.code === 11000) {
@@ -98,40 +107,29 @@ UploadSchema.statics = {
   },
 
   load: function (options) {
-    var query = this.findOne(options.criteria);
-    if(options.select) query.select(options.select);
+    var query;
+
+    if(options.findOne) {
+      query = this.findOne(options.where);
+    } else {
+      query = this.find(options.where);
+      query.skip(options.skip);
+      query.limit(options.limit);
+    }
+    if(options.select) {
+      query.select(options.select)
+    }
+
     return new Promise(function(resolve, reject) {
       query.exec(function(err, doc) {
         if(err) reject(err);
         else resolve(doc);
-      });
-    });
-  },
-
-  loadAll: function (options) {
-    var query = this.find(options.criteria);
-    query.sort({ created: 'asc'})
-    if(options.skip) query.skip(options.skip);
-    if(options.limit) query.limit(options.limit);
-    if(options.select) query.select(options.select);
-    return new Promise(function(resolve, reject) {
-      query.exec(function(err, doc) {
-        if(err) reject(err);
-        else resolve(doc);
-      });
-    });
-  },
-
-  count: function (condition) {
-    var query = this.where(condition);
-    return new Promise(function(resolve, reject) {
-      query.count(function(err, count) {
-        if(err) reject(err);
-        else resolve(count);
       });
     });
   }
 }
+
+
 
 /**
  * Methods
@@ -146,28 +144,39 @@ UploadSchema.methods = {
   }
 }
 
+
+
 /**
  * Virtuals
  */
 
-UploadSchema.virtual('response')
+UploadSchema.virtual('publicUrl')
 .get(function() {
-  return {
-    id: this._id,
-    userid: this._userid,
-    title: this.title,
-    shortlink: config.host + '/' + this.shortlink,
-    views: this.views,
-    created: this.created,
-    info: {
-      publicUrl: this.generatePublicURL(this.destination, this._userid, this.filename),
-      size: this.size,
-      mimetype: this.mimetype
-    }
-  }
+  return this.generatePublicURL(this.destination, this._userid, this.filename);
 });
 
-UploadSchema.set('toJSON', { virtuals: true });
+
+
+/**
+ * Options
+ */
+
+if(!UploadSchema.options.toObject) UploadSchema.options.toObject = {};
+UploadSchema.options.toObject.transform = function (doc, ret, options) {
+  return {
+    id: ret._id,
+    userid: ret._userid,
+    title: ret.title,
+    shortlink: config.host + '/' + ret.shortlink,
+    views: ret.views,
+    created: ret.created,
+    info: {
+      publicUrl: doc.publicUrl,
+      size: ret.size,
+      mimetype: ret.mimetye
+    }
+  }
+}
 
 mongoose.model('Upload', UploadSchema);
 var Upload = mongoose.model('Upload');

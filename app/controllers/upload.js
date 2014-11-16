@@ -1,11 +1,15 @@
-var fs = require('fs')
+/**
+ * Upload controller
+ */
+
+var _ = require('lodash')
+  , fs = require('fs')
   , path = require('path')
-  , _ = require('lodash')
   , config = require('config')
   , Promise = require('bluebird')
   , mkdirp = require('mkdirp')
-  , encryptor = require('file-encryptor')
-  , mongoose = require('mongoose');
+  , mongoose = require('mongoose')
+  , encryptor = require('file-encryptor');
 var status = require('../helpers/status');
 
 var Upload = mongoose.model('Upload');
@@ -23,7 +27,8 @@ var Upload = mongoose.model('Upload');
  * TODO: catch -> delete saved file, delete created db entry
  */
 exports.post = function(req, res, next) {
-  var userdir = path.join(__dirname, '../../uploads/'+req.user.id);
+  if(!req.files.file) return next(status.BadRequest('No file found.'));
+  var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
   var source = path.join(__dirname, '../../'+req.files.file.path);
   var dest = path.join(userdir, req.files.file.name);
   var upload;
@@ -35,9 +40,8 @@ exports.post = function(req, res, next) {
   mkdir(userdir)
   .then(function(dir) {
     // Create new document in upload model
-
     return Upload.create({
-      userid: req.user.id,
+      userid: req.user._id,
       title: req.files.file.originalname,
       mimetype: req.files.file.mimetype,
       size: req.files.file.size,
@@ -53,7 +57,7 @@ exports.post = function(req, res, next) {
     return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
   .then(function() {
-    res.send(upload.response);
+    res.json(upload.toObject());
   })
   .catch(function(err) {
     next('Unknown error when processing upload.');
@@ -66,9 +70,18 @@ exports.post = function(req, res, next) {
  * @returns Array of Upload Objects
  */
 exports.list = function(req, res, next) {
-  Upload.loadAll({ criteria: { _userid: req.user.id }, limit: req.param('limit'), skip: req.param('skip')}).then(function(docs) {
-    var response = _.map(docs, function(doc) { return doc.response });
-    res.send(response);
+  var options = {
+    where: { _userid: req.user.id },
+    limit: req.param('limit'),
+    skip: req.param('skip')
+  };
+
+  Upload.load(options).then(function(docs) {
+    // docs is an array, and every item in this array is a mongooseDocument
+    // with the method toObject(). We need this toObject() of every document.
+    var toObjectDocs = _.map(docs, function(doc) { return doc.toObject(); });
+
+    res.json(toObjectDocs);
   })
   .catch(function(err) {
     next(err);
@@ -81,9 +94,13 @@ exports.list = function(req, res, next) {
  * @returns Single Upload Object
  */
 exports.get = function(req, res, next) {
-  var id = req.param('id');
-  Upload.load({ criteria: { _id: id }}).then(function(doc) {
-    res.send(doc.response);
+  var options = {
+    findOne: true,
+    where: { _id: req.param('upload_id') }
+  };
+  Upload.load(options).then(function(doc) {
+    if(!doc) throw null;
+    res.json(doc.toObject());
   })
   .catch(function(err) {
     next(err);
@@ -94,14 +111,21 @@ exports.get = function(req, res, next) {
  * render the upload view
  */
 exports.show = function(req, res, next) {
-  var shortlink = req.param('shortlink');
+  var options = {
+    findOne: true,
+    where: { shortlink: req.param('shortlink') }
+  };
 
-  // Get upload based on shortlink
-  Upload.load({ criteria: { shortlink: shortlink }})
+  Upload.load(options)
   .then(function(doc) {
-    res.render('view', { image: doc.response.info.publicUrl})
+    // If no doc is found, no shortlink exists
+    // and so that's a 404. We don't want to throw
+    // a error for this, just escape the promise.
+    if(!doc) throw null;
+
+    res.render('view', { image: doc.publicUrl })
   })
   .catch(function(err) {
-    next();
+    next(err);
   });
 }

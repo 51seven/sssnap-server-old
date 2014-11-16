@@ -1,6 +1,9 @@
+/**
+ * Google API helper
+ */
+
 var https = require('https')
   , Promise = require('bluebird');
-
 var status = require('./status');
 
 exports.callAPI = function(path, access_token) {
