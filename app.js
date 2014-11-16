@@ -26,8 +26,14 @@ mongoose.connection.on('error', console.log);
 // Bootstrap models
 fs.readdirSync('./app/models').forEach(function (file) {
   if (~file.indexOf('.js')) require('./app/models/' + file);
-});
 
+  // Database needs to be clean when testing
+  if(process.env.NODE_ENV === 'test') {
+    mongoose.model(file.charAt(0).toUpperCase() + file.substring(1, file.length - 3)).remove({}, function(err) {
+      if(err) console.log(err);
+    });
+  }
+});
 
 
 /**
@@ -35,8 +41,6 @@ fs.readdirSync('./app/models').forEach(function (file) {
  */
 
 var app = express();
-
-
 
 
 // Mount the middleware to the express
