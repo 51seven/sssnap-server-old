@@ -29,7 +29,7 @@ _also see [https://github.com/51seven/sssnap-server/milestones?state=open](https
 - [x] Refactoring stuff
 - [x] Mongoose Schema improvement
 - [x] Commenting
-- [ ] Testing
+- [x] Testing
 
 **v0.1.0 (started 2014-11-13) (closed 2014-11-14)**  
 - [x] The API lists uploaded files with skip and limits
