@@ -27,6 +27,7 @@ var Upload = mongoose.model('Upload');
  * TODO: catch -> delete saved file, delete created db entry
  */
 exports.post = function(req, res, next) {
+  if(!req.files.file) return next(status.BadRequest('No file found.'));
   var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
   var source = path.join(__dirname, '../../'+req.files.file.path);
   var dest = path.join(userdir, req.files.file.name);
@@ -39,7 +40,6 @@ exports.post = function(req, res, next) {
   mkdir(userdir)
   .then(function(dir) {
     // Create new document in upload model
-    console.log(req.user);
     return Upload.create({
       userid: req.user._id,
       title: req.files.file.originalname,
@@ -99,6 +99,7 @@ exports.get = function(req, res, next) {
     where: { _id: req.param('upload_id') }
   };
   Upload.load(options).then(function(doc) {
+    if(!doc) throw null;
     res.json(doc.toObject());
   })
   .catch(function(err) {

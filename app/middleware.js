@@ -29,7 +29,7 @@ module.exports = function(app) {
 
   // uncomment after placing your favicon in /public
   //app.use(favicon(__dirname + '/public/favicon.ico'));
-  app.use(logger('dev'));
+  if(process.env.NODE_ENV !== 'test') app.use(logger('dev'));
 
   // multer only parses multipart/form-data
   // stores incoming files in /uploads/temp
