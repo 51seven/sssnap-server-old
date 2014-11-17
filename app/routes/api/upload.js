@@ -9,10 +9,7 @@ var router = express.Router();
 
 var controller = require('../../controllers/upload');
 
-router.param('upload_id', function(req, res, next, id) {
-  // check if user is allowed to do this action
-  next();
-});
+router.param('upload_id', controller.permission);
 
 
 router.route('/')
