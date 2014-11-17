@@ -14,6 +14,21 @@ var status = require('../helpers/status');
 
 var Upload = mongoose.model('Upload');
 
+
+exports.permission = function(req, res, next, uploadId) {
+  var options = {
+    findOne: true,
+    where: { _id: uploadId }
+  };
+  Upload.load(options).then(function(doc) {
+    if(doc._userid != req.user.id) throw new status.Forbidden('Access denied.');
+    else next();
+  })
+  .catch(function(err) {
+    next(err);
+  });
+}
+
 /**
  * This upload routine does:
  *  * create a userdir if necessary
