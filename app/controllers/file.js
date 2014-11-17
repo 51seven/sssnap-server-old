@@ -73,6 +73,10 @@ exports.privateShow = function(req, res, next) {
   var userid = req.param('userid')
     , filename = req.param('filename');
 
+  if(!req.param('access_token') || !req.param('provider')) {
+    return next(new status.BadRequest('Access only with URL parameter. Access to static files can just be perfomed using your access_token and provider information in the URL.'))
+  }
+
   var options = {
     findOne: true,
     where: { _userid: userid, filename: filename }
