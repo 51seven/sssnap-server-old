@@ -76,8 +76,7 @@ UploadSchema.statics = {
     var self = this;
     if(!count) count = 1;
     return new Promise(function(resolve, reject) {
-      var shortlink = randString(4);
-      newUpload.shortlink = shortlink;
+      newUpload.shortlink = randString(4);
 
       // TODO: Test this error 11000 fallback
       newUpload.save(function(err, doc) {
@@ -165,7 +164,7 @@ UploadSchema.options.toObject.transform = function (doc, ret, options) {
     info: {
       publicUrl: doc.publicUrl,
       size: ret.size,
-      mimetype: ret.mimetye
+      mimetype: ret.mimetype
     }
   }
 }

@@ -5,7 +5,6 @@
 var _ = require('lodash')
   , fs = require('fs')
   , path = require('path')
-  , mime = require('mime')
   , config = require('config')
   , Promise = require('bluebird')
   , mkdirp = require('mkdirp')
@@ -50,7 +49,7 @@ exports.post = function(req, res, next) {
   .then(function(dir) {
     // Create new document in upload model
     var newUpload = new Upload({
-      userid: req.user._id,
+      _userid: req.user._id,
       title: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
