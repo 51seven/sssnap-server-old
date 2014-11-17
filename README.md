@@ -24,7 +24,14 @@ Milestones
 
 _also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_
 
-**v0.1.1 Improvement (started 2014-11-14)**  
+**v0.2.x (started 2014-11-17)**
+- [x] Restrict access to uploads from others
+- [x] View private raw files
+- [x] Restrict non-images
+- [ ] User Quota Information
+- [ ] Thumbnails
+
+**v0.1.1 Improvement (started 2014-11-14) (closed 2014-11-16**  
 - [x] Code cleaning
 - [x] Refactoring stuff
 - [x] Mongoose Schema improvement
