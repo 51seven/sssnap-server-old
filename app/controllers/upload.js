@@ -5,6 +5,7 @@
 var _ = require('lodash')
   , fs = require('fs')
   , path = require('path')
+  , mime = require('mime')
   , config = require('config')
   , Promise = require('bluebird')
   , mkdirp = require('mkdirp')
@@ -27,11 +28,12 @@ var Upload = mongoose.model('Upload');
  * TODO: catch -> delete saved file, delete created db entry
  */
 exports.post = function(req, res, next) {
-  if(!req.files.file) return next(status.BadRequest('No file found.'));
+  var file = req.files.file;
+
+  if(!file) return next(status.BadRequest('No file found.'));
   var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
-  var source = path.join(__dirname, '../../'+req.files.file.path);
-  var dest = path.join(userdir, req.files.file.name);
-  var upload;
+  var source = path.join(__dirname, '../../'+file.path);
+  var upload, dest;
 
   var encryptFile = Promise.promisify(encryptor.encryptFile);
   var mkdir = Promise.promisify(mkdirp);
@@ -39,15 +41,27 @@ exports.post = function(req, res, next) {
   // Make userdir, if it doesn't exist
   mkdir(userdir)
   .then(function(dir) {
+    var uid = mongoose.Types.ObjectId();
+
+    console.log(uid);
+
+    // Generate new filename with objectid
+    var ext = mime.extension(file.mimetype);
+    var savename = uid + '.' + ext;
+    dest = path.join(userdir, savename);
+
     // Create new document in upload model
-    return Upload.create({
-      userid: req.user._id,
-      title: req.files.file.originalname,
-      mimetype: req.files.file.mimetype,
-      size: req.files.file.size,
+    var newUpload = new Upload({
+      _id: uid,
+      _userid: req.user._id,
+      title: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
       destination: dest,
-      filename: req.files.file.name
+      filename: file.name
     });
+
+    return Upload.create(newUpload);
   })
   .then(function(upl) {
     upload = upl;
@@ -60,7 +74,7 @@ exports.post = function(req, res, next) {
     res.json(upload.toObject());
   })
   .catch(function(err) {
-    next('Unknown error when processing upload.');
+    next(err);
   });
 }
 
