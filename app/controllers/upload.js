@@ -30,9 +30,16 @@ var Upload = mongoose.model('Upload');
 exports.post = function(req, res, next) {
   var file = req.files.file;
 
+  // Bad Request when no file was uploaded
   if(!file) return next(status.BadRequest('No file found.'));
+
+  // Bad Request when wrong mimetype was uploaded
+  if(file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg') {
+    return next(status.BadRequest('Wrong image mimetype. Only image/png and image/jpeg files are allowed.'));
+  }
   var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
   var source = path.join(__dirname, '../../'+file.path);
+  var dest = path.join(userdir, req.files.file.name);
   var upload, dest;
 
   var encryptFile = Promise.promisify(encryptor.encryptFile);
@@ -41,19 +48,9 @@ exports.post = function(req, res, next) {
   // Make userdir, if it doesn't exist
   mkdir(userdir)
   .then(function(dir) {
-    var uid = mongoose.Types.ObjectId();
-
-    console.log(uid);
-
-    // Generate new filename with objectid
-    var ext = mime.extension(file.mimetype);
-    var savename = uid + '.' + ext;
-    dest = path.join(userdir, savename);
-
     // Create new document in upload model
     var newUpload = new Upload({
-      _id: uid,
-      _userid: req.user._id,
+      userid: req.user._id,
       title: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
