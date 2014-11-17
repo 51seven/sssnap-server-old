@@ -14,6 +14,21 @@ var status = require('../helpers/status');
 
 var Upload = mongoose.model('Upload');
 
+
+exports.permission = function(req, res, next, uploadId) {
+  var options = {
+    findOne: true,
+    where: { _id: uploadId }
+  };
+  Upload.load(options).then(function(doc) {
+    if(doc._userid != req.user.id) throw new status.Forbidden('Access denied.');
+    else next();
+  })
+  .catch(function(err) {
+    next(err);
+  });
+}
+
 /**
  * This upload routine does:
  *  * create a userdir if necessary
@@ -27,11 +42,19 @@ var Upload = mongoose.model('Upload');
  * TODO: catch -> delete saved file, delete created db entry
  */
 exports.post = function(req, res, next) {
-  if(!req.files.file) return next(status.BadRequest('No file found.'));
+  var file = req.files.file;
+
+  // Bad Request when no file was uploaded
+  if(!file) return next(status.BadRequest('No file found.'));
+
+  // Bad Request when wrong mimetype was uploaded
+  if(file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg') {
+    return next(status.BadRequest('Wrong image mimetype. Only image/png and image/jpeg files are allowed.'));
+  }
   var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
-  var source = path.join(__dirname, '../../'+req.files.file.path);
+  var source = path.join(__dirname, '../../'+file.path);
   var dest = path.join(userdir, req.files.file.name);
-  var upload;
+  var upload, dest;
 
   var encryptFile = Promise.promisify(encryptor.encryptFile);
   var mkdir = Promise.promisify(mkdirp);
@@ -40,14 +63,16 @@ exports.post = function(req, res, next) {
   mkdir(userdir)
   .then(function(dir) {
     // Create new document in upload model
-    return Upload.create({
-      userid: req.user._id,
-      title: req.files.file.originalname,
-      mimetype: req.files.file.mimetype,
-      size: req.files.file.size,
+    var newUpload = new Upload({
+      _userid: req.user._id,
+      title: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
       destination: dest,
-      filename: req.files.file.name
+      filename: file.name
     });
+
+    return Upload.create(newUpload);
   })
   .then(function(upl) {
     upload = upl;
@@ -60,7 +85,7 @@ exports.post = function(req, res, next) {
     res.json(upload.toObject());
   })
   .catch(function(err) {
-    next('Unknown error when processing upload.');
+    next(err);
   });
 }
 

@@ -6,7 +6,13 @@
 var express = require('express');
 var router = express.Router();
 
-router.get('/pub/:key/:timestamp/:userid/:filename', require('../../controllers/file').show);
+var auth = require('../../controllers/auth');
+var controller = require('../../controllers/file');
+
+router.get('/pub/:key/:timestamp/:userid/:filename', controller.publicShow);
+
+router.use('/pri', auth);
+router.get('/pri/:userid/:filename', controller.privateShow);
 
 
 module.exports = router;

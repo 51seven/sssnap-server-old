@@ -72,20 +72,11 @@ var UploadSchema = new Schema({
  */
 
 UploadSchema.statics = {
-  create: function(opts, count) {
+  create: function(newUpload, count) {
     var self = this;
     if(!count) count = 1;
     return new Promise(function(resolve, reject) {
-      var shortlink = randString(4);
-      var newUpload = new Upload({
-        _userid: opts.userid,
-        title: opts.title,
-        mimetype: opts.mimetype,
-        size: opts.size,
-        destination: opts.destination,
-        shortlink: shortlink,
-        filename: opts.filename
-      });
+      newUpload.shortlink = randString(4);
 
       // TODO: Test this error 11000 fallback
       newUpload.save(function(err, doc) {
@@ -93,7 +84,7 @@ UploadSchema.statics = {
           if(err.code === 11000) {
             count++;
             if(count < 6) {
-              self.create(opts, count);
+              self.create(upload, count);
             } else {
               reject(err);
             }
@@ -173,7 +164,7 @@ UploadSchema.options.toObject.transform = function (doc, ret, options) {
     info: {
       publicUrl: doc.publicUrl,
       size: ret.size,
-      mimetype: ret.mimetye
+      mimetype: ret.mimetype
     }
   }
 }
