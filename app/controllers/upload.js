@@ -13,15 +13,18 @@ var _ = require('lodash')
 var status = require('../helpers/status');
 
 var Upload = mongoose.model('Upload');
+var User = mongoose.model('User');
 
 
 exports.permission = function(req, res, next, uploadId) {
   var options = {
     findOne: true,
-    where: { _id: uploadId }
+    where: { _id: uploadId },
+    populate: ''
   };
   Upload.load(options).then(function(doc) {
-    if(doc._userid != req.user.id) throw new status.Forbidden('Access denied.');
+    if(!doc) throw null;
+    if(doc._user != req.user.id) throw new status.Forbidden('Access denied.');
     else next();
   })
   .catch(function(err) {
@@ -64,7 +67,7 @@ exports.post = function(req, res, next) {
   .then(function(dir) {
     // Create new document in upload model
     var newUpload = new Upload({
-      _userid: req.user._id,
+      _user: req.user._id,
       title: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
@@ -76,6 +79,19 @@ exports.post = function(req, res, next) {
   })
   .then(function(upl) {
     upload = upl;
+    var options = {
+      findOne: true,
+      where: { _id: upload._user }
+    }
+
+    return User.load(options);
+  })
+  .then(function(user) {
+    console.log(user);
+    user.uploads.push(upload);
+    user.save();
+  })
+  .then(function(saveduser) {
 
     // encrypt the temporary file using AES256 and
     // save the encrypted file in the userdir
@@ -96,7 +112,7 @@ exports.post = function(req, res, next) {
  */
 exports.list = function(req, res, next) {
   var options = {
-    where: { _userid: req.user.id },
+    where: { _user: req.user.id },
     limit: req.param('limit'),
     skip: req.param('skip')
   };
@@ -119,6 +135,9 @@ exports.list = function(req, res, next) {
  * @returns Single Upload Object
  */
 exports.get = function(req, res, next) {
+
+  // Don't populate user here
+  // or you will suffer from a great pain
   var options = {
     findOne: true,
     where: { _id: req.param('upload_id') }

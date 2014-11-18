@@ -44,7 +44,7 @@ exports.publicShow = function(req, res, next) {
 
   var options = {
     findOne: true,
-    where: { _userid: userid, filename: filename }
+    where: { _user: userid, filename: filename }
   };
   Upload.load(options).then(function(doc) {
     var destination = doc.destination;
@@ -58,6 +58,7 @@ exports.publicShow = function(req, res, next) {
     }
 
     if(!doc) return next();
+    if(!fs.existsSync(destination)) return next();
 
     decrypt(destination).then(function(img) {
       res.writeHead(200, { 'Content-Type': doc.mimetype });
@@ -66,6 +67,8 @@ exports.publicShow = function(req, res, next) {
     .catch(function(err) {
       next(err);
     });
+  }).catch(function(err) {
+    next(err);
   });
 }
 

@@ -3,6 +3,7 @@
  */
 
 var mongoose = require('mongoose')
+  , _ = require('lodash')
   , Promise = require('bluebird');
 
 var Upload = mongoose.model('Upload');
@@ -33,7 +34,13 @@ var UserSchema = new Schema({
   },
   imageUrl: {
     type: String
-  }
+  },
+  uploads: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Upload'
+    }
+  ]
 });
 
 /**
@@ -56,7 +63,8 @@ UserSchema.statics = {
 
         // user exists = update image
         else if(doc) {
-          self.findOneAndUpdate({ _id: mongoose.Types.ObjectId(doc._id) }, { imageUrl: opts.imageUrl }, function(err, doc) {
+          var query = self.findOneAndUpdate({ _id: doc._id }, { imageUrl: opts.imageUrl });
+          query.exec(function(err, doc) {
             if(err) reject(err);
             else resolve(doc);
           });
@@ -83,9 +91,8 @@ UserSchema.statics = {
       query.skip(options.skip);
       query.limit(options.limit);
     }
-    if(options.select) {
-      query.select(options.select)
-    }
+    if(options.select) query.select(options.select);
+    if(options.populate) query.populate(options.populate);
 
     return new Promise(function(resolve, reject) {
       query.exec(function(err, doc) {
@@ -97,12 +104,21 @@ UserSchema.statics = {
 }
 
 /**
+ * Virtuals
+ */
+
+UserSchema.virtual('uploadcount')
+.get(function() {
+  return this.uploads.length;
+});
+
+/**
  * Options
  */
 
 if(!UserSchema.options.toObject) UserSchema.options.toObject = {};
 UserSchema.options.toObject.transform = function (doc, ret, options) {
-  return {
+  var obj = {
     id: ret._id,
     name: ret.name,
     email: ret.email,
@@ -110,8 +126,20 @@ UserSchema.options.toObject.transform = function (doc, ret, options) {
     oauth: {
       provider: ret.provider,
       id: ret.externalId
+    },
+    uploads: {
+      total: doc.uploadcount
     }
+  };
+
+  if(options.populate == 'uploads') {
+    var skip = options.options.skip*1;
+    var limit = options.options.limit*1
+    var range = doc.uploads.slice(skip, limit+skip);
+    obj.uploads.list = _.map(range, function(obj) { return obj.toObject() });
   }
+
+  return obj;
 }
 
 

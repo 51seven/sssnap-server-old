@@ -25,7 +25,7 @@ var randString = function (len) {
  */
 
 var UploadSchema = new Schema({
-  _userid: {
+  _user: {
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
@@ -107,9 +107,8 @@ UploadSchema.statics = {
       query.skip(options.skip);
       query.limit(options.limit);
     }
-    if(options.select) {
-      query.select(options.select)
-    }
+    if(options.select) query.select(options.select);
+    if(options.populate) query.populate(options.populate);
 
     return new Promise(function(resolve, reject) {
       query.exec(function(err, doc) {
@@ -141,9 +140,14 @@ UploadSchema.methods = {
  * Virtuals
  */
 
+UploadSchema.virtual('_userid')
+.get(function() {
+  return this._user._id;
+})
+
 UploadSchema.virtual('publicUrl')
 .get(function() {
-  return this.generatePublicURL(this.destination, this._userid, this.filename);
+  return this.generatePublicURL(this.destination, this._user, this.filename);
 });
 
 
@@ -156,7 +160,7 @@ if(!UploadSchema.options.toObject) UploadSchema.options.toObject = {};
 UploadSchema.options.toObject.transform = function (doc, ret, options) {
   return {
     id: ret._id,
-    userid: ret._userid,
+    user: ret._user,
     title: ret.title,
     shortlink: config.host + '/' + ret.shortlink,
     views: ret.views,
