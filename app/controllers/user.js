@@ -6,11 +6,10 @@ var _ = require('lodash')
   , Promise = require('bluebird')
   , mongoose = require('mongoose');
 var google = require('../helpers/google')
-  , status = require('../helpers/status');
+  , status = require('../helpers/status')
+  , resobj = require('../helpers/res-object');
 
 var User = mongoose.model('User');
-var Upload = mongoose.model('Upload');
-
 
 function getUser(user) {
   return new Promise(function(resolve, reject) {
@@ -60,17 +59,34 @@ exports.get = function(req, res, next) {
   var populate = {};
   var limit = req.param('limit') || 10;
   var skip = req.param('skip') || 0;
-  if(req.param('populate') === 'uploads') populate = { populate: 'uploads' };
-
-  var transform = _.assign({transform: true}, populate, { options: { limit: limit, skip: skip }});
 
   getUser(req.user).then(function(newUser) {
     return User.createOrUpdate(newUser);
   }).then(function(user) {
-    var options = { findOne: true, where: { _id: user._id }, populate: { path: 'uploads' }};
-    return User.load(options);
-  }).then(function(user) {
-    res.json(user.toObject(transform));
+    var options = [
+      {
+        model: 'User',
+        key: null,
+        options: {
+          findOne: true,
+          where: { _id: user._id },
+          populate: 'uploads'
+        }
+      },
+      {
+        model: 'Upload',
+        key: 'uploads',
+        options: {
+          where: { _user: user._id },
+          skip: skip,
+          limit: limit,
+          populate: '_user'
+        }
+      }
+    ]
+    return resobj(options, req);
+  }).then(function(obj) {
+    res.json(obj);
   }).catch(function(err) {
     next(err);
   });

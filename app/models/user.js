@@ -35,6 +35,10 @@ var UserSchema = new Schema({
   imageUrl: {
     type: String
   },
+  totalSpace: {
+    type: Number,
+    default: 10000000000
+  },
   uploads: [
     {
       type: Schema.Types.ObjectId,
@@ -107,12 +111,12 @@ UserSchema.statics = {
  * Virtuals
  */
 
-UserSchema.virtual('uploadcount')
+UserSchema.virtual('uploadCount')
 .get(function() {
   return this.uploads.length;
 });
 
-UserSchema.virtual('usedspace')
+UserSchema.virtual('usedSpace')
 .get(function() {
   var space = 0;
   _.forEach(this.uploads, function(upload) { space += upload.size });
@@ -125,7 +129,7 @@ UserSchema.virtual('usedspace')
 
 if(!UserSchema.options.toObject) UserSchema.options.toObject = {};
 UserSchema.options.toObject.transform = function (doc, ret, options) {
-  var obj = {
+  return {
     id: ret._id,
     name: ret.name,
     email: ret.email,
@@ -134,20 +138,12 @@ UserSchema.options.toObject.transform = function (doc, ret, options) {
       provider: ret.provider,
       id: ret.externalId
     },
-    uploads: {
-      total: doc.uploadcount,
-      used: doc.usedspace
+    quota: {
+      used: doc.usedSpace,
+      total: ret.totalSpace,
+      count: doc.uploadCount
     }
-  };
-
-  if(options.populate == 'uploads') {
-    var skip = options.options.skip*1;
-    var limit = options.options.limit*1
-    var range = doc.uploads.slice(skip, limit+skip);
-    obj.uploads.list = _.map(range, function(obj) { return obj.toObject() });
   }
-
-  return obj;
 }
 
 

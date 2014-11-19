@@ -10,7 +10,8 @@ var _ = require('lodash')
   , mkdirp = require('mkdirp')
   , mongoose = require('mongoose')
   , encryptor = require('file-encryptor');
-var status = require('../helpers/status');
+var status = require('../helpers/status')
+  , resobj = require('../helpers/res-object');
 
 var Upload = mongoose.model('Upload');
 var User = mongoose.model('User');
@@ -57,7 +58,7 @@ exports.post = function(req, res, next) {
   var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
   var source = path.join(__dirname, '../../'+file.path);
   var dest = path.join(userdir, req.files.file.name);
-  var upload, dest;
+  var upload, dest, response;
 
   var encryptFile = Promise.promisify(encryptor.encryptFile);
   var mkdir = Promise.promisify(mkdirp);
@@ -79,25 +80,51 @@ exports.post = function(req, res, next) {
   })
   .then(function(upl) {
     upload = upl;
+
+    // Create response object
+    var options = [
+      {
+        model: 'Upload',
+        key: null,
+        options: {
+          findOne: true,
+          where: { _id: upl._id },
+          populate: '_user'
+        }
+      },
+      {
+        model: 'User',
+        key: 'user',
+        options: {
+          findOne: true,
+          where: { _id: upl._user },
+          populate: 'uploads'
+        }
+      }
+    ];
+    return resobj(options, req);
+  }).then(function(obj) {
+    // Get user doc in order to save upload-ref in it
+    response = obj;
     var options = {
       findOne: true,
-      where: { _id: upload._user }
+      where: { _id: response.user.id },
     }
 
     return User.load(options);
   })
   .then(function(user) {
+    // Save upload-ref in user doc
     user.uploads.push(upload);
     user.save();
   })
-  .then(function(saveduser) {
-
+  .then(function() {
     // encrypt the temporary file using AES256 and
     // save the encrypted file in the userdir
     return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
   .then(function() {
-    res.json(upload.toObject());
+    res.json(response);
   })
   .catch(function(err) {
     next(err);
@@ -113,7 +140,8 @@ exports.list = function(req, res, next) {
   var options = {
     where: { _user: req.user.id },
     limit: req.param('limit'),
-    skip: req.param('skip')
+    skip: req.param('skip'),
+    populate: '_user'
   };
 
   Upload.load(options).then(function(docs) {
@@ -139,7 +167,8 @@ exports.get = function(req, res, next) {
   // or you will suffer from a great pain
   var options = {
     findOne: true,
-    where: { _id: req.param('upload_id') }
+    where: { _id: req.param('upload_id') },
+    populate: '_user'
   };
   Upload.load(options).then(function(doc) {
     if(!doc) throw null;

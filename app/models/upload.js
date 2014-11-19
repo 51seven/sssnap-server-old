@@ -50,7 +50,7 @@ var UploadSchema = new Schema({
     required: true,
     unique: true
   },
-  shortlink: {
+  shortid: {
     type: String,
     required: true,
     unique: true
@@ -76,7 +76,7 @@ UploadSchema.statics = {
     var self = this;
     if(!count) count = 1;
     return new Promise(function(resolve, reject) {
-      newUpload.shortlink = randString(4);
+      newUpload.shortid = randString(4);
 
       // TODO: Test this error 11000 fallback
       newUpload.save(function(err, doc) {
@@ -143,12 +143,17 @@ UploadSchema.methods = {
 UploadSchema.virtual('_userid')
 .get(function() {
   return this._user._id;
-})
+});
 
 UploadSchema.virtual('publicUrl')
 .get(function() {
-  return this.generatePublicURL(this.destination, this._user, this.filename);
+  return this.generatePublicURL(this.destination, this._userid, this.filename);
 });
+
+UploadSchema.virtual('shortlink')
+.get(function() {
+  return config.host + this.shortid;
+})
 
 
 
@@ -160,9 +165,9 @@ if(!UploadSchema.options.toObject) UploadSchema.options.toObject = {};
 UploadSchema.options.toObject.transform = function (doc, ret, options) {
   return {
     id: ret._id,
-    user: ret._user,
+    userid: doc._userid,
     title: ret.title,
-    shortlink: config.host + '/' + ret.shortlink,
+    shortlink: doc.shortlink,
     views: ret.views,
     created: ret.created,
     info: {

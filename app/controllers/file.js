@@ -53,7 +53,7 @@ exports.publicShow = function(req, res, next) {
 
     // Check if Signature is valid
     // or if Signature is expired
-    if(Signature !== key || (dateCompare > 300000 || dateCompare < -30000)) {
+    if(Signature !== key || (dateCompare > 10000 || dateCompare < -10000)) {
       return next(new status.Forbidden('Access to file invalid or expired.'));
     }
 
