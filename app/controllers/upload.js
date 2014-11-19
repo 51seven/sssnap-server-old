@@ -87,7 +87,6 @@ exports.post = function(req, res, next) {
     return User.load(options);
   })
   .then(function(user) {
-    console.log(user);
     user.uploads.push(upload);
     user.save();
   })

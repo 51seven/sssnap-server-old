@@ -112,6 +112,13 @@ UserSchema.virtual('uploadcount')
   return this.uploads.length;
 });
 
+UserSchema.virtual('usedspace')
+.get(function() {
+  var space = 0;
+  _.forEach(this.uploads, function(upload) { space += upload.size });
+  return space;
+});
+
 /**
  * Options
  */
@@ -128,7 +135,8 @@ UserSchema.options.toObject.transform = function (doc, ret, options) {
       id: ret.externalId
     },
     uploads: {
-      total: doc.uploadcount
+      total: doc.uploadcount,
+      used: doc.usedspace
     }
   };
 

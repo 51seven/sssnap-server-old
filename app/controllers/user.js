@@ -67,11 +67,7 @@ exports.get = function(req, res, next) {
   getUser(req.user).then(function(newUser) {
     return User.createOrUpdate(newUser);
   }).then(function(user) {
-    var options = { findOne: true, where: { _id: user._id }};
-    if(!_.isEmpty(populate)) {
-      options = _.assign(options, { populate: { path: 'uploads' }});
-    }
-
+    var options = { findOne: true, where: { _id: user._id }, populate: { path: 'uploads' }};
     return User.load(options);
   }).then(function(user) {
     res.json(user.toObject(transform));

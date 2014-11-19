@@ -19,6 +19,10 @@ describe('API User Routes', function() {
             oauth: {
               provider: 'google',
               id: '113540964082774770000'
+            },
+            uploads: {
+              total: 0,
+              used: 0
             }
           });
           done();
