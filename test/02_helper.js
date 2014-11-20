@@ -8,17 +8,21 @@ describe('Helper functions', function() {
     sig.should.equal('N2IxYmVlYTZjMGIzOWNlMzQ3YWYzODM5MzJhMWFmNGZkZDAyZWZkMA==');
   });
   it('should return a correct forbidden error', function() {
-    var err = status.Forbidden('test');
+    var err = status.Forbidden(0, 'abc', 'def');
     err.should.be.an.instanceOf(Object).and.have.properties({
-      message: 'test',
-      status: 403
+      code: 0,
+      status: 403,
+      message: 'abc',
+      info: 'def'
     });
   });
   it('should return a correct bad request error', function() {
-    var err = status.BadRequest('test');
+    var err = status.BadRequest(0, 'abc', 'def');
     err.should.be.an.instanceOf(Object).and.have.properties({
-      message: 'test',
-      status: 400
+      code: 0,
+      status: 400,
+      message: 'abc',
+      info: 'def'
     });
   });
 });
