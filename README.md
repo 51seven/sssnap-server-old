@@ -31,7 +31,7 @@ _also see [https://github.com/51seven/sssnap-server/milestones?state=open](https
 - [ ] User Quota Information
 - [ ] Thumbnails
 
-**v0.1.1 Improvement (started 2014-11-14) (closed 2014-11-16**  
+**v0.1.1 Improvement (started 2014-11-14) (closed 2014-11-16)**  
 - [x] Code cleaning
 - [x] Refactoring stuff
 - [x] Mongoose Schema improvement

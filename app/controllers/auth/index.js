@@ -31,7 +31,7 @@ module.exports = function(req, res, next) {
         return require('./' + provider)(req, res, next);
         break;
       default:
-        return next(status.Forbidden('No authentication provider found. You have to add the name of your provider in the HTTP header or in the URL path.'))
+        return next(status.Forbidden(000, 'No authentication provider', 'You have to send the name of your provider in the HTTP header \'x-auth-provider\' or in the URL query as \'provider\'. Valid values are: google'));
     }
 
   }

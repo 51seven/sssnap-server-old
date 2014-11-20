@@ -10,9 +10,11 @@ var _ = require('lodash')
   , mkdirp = require('mkdirp')
   , mongoose = require('mongoose')
   , encryptor = require('file-encryptor');
-var status = require('../helpers/status');
+var status = require('../helpers/status')
+  , resobj = require('../helpers/res-object');
 
 var Upload = mongoose.model('Upload');
+var User = mongoose.model('User');
 
 
 exports.permission = function(req, res, next, uploadId) {
@@ -21,7 +23,8 @@ exports.permission = function(req, res, next, uploadId) {
     where: { _id: uploadId }
   };
   Upload.load(options).then(function(doc) {
-    if(doc._userid != req.user.id) throw new status.Forbidden('Access denied.');
+    if(!doc) throw null;
+    if(doc._user != req.user.id) throw new status.Forbidden(000, 'Access denied', 'You have no permissions to perform this action.');
     else next();
   })
   .catch(function(err) {
@@ -45,26 +48,24 @@ exports.post = function(req, res, next) {
   var file = req.files.file;
 
   // Bad Request when no file was uploaded
-  if(!file) return next(status.BadRequest('No file found.'));
+  if(!file) return next(status.BadRequest(000, 'File not found', 'Use \'file\' as the key in your multipart/form-data request.'));
 
   // Bad Request when wrong mimetype was uploaded
   if(file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg') {
-    return next(status.BadRequest('Wrong image mimetype. Only image/png and image/jpeg files are allowed.'));
+    return next(status.BadRequest(000, 'Invalid file mimetype', 'Only image/png and image/jpeg files are allowed.'));
   }
   var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
   var source = path.join(__dirname, '../../'+file.path);
   var dest = path.join(userdir, req.files.file.name);
-  var upload, dest;
+  var upload, response;
 
   var encryptFile = Promise.promisify(encryptor.encryptFile);
   var mkdir = Promise.promisify(mkdirp);
 
-  // Make userdir, if it doesn't exist
-  mkdir(userdir)
-  .then(function(dir) {
-    // Create new document in upload model
+  mkdir(userdir) // Make userdir, if it doesn't exist
+  .then(function(dir) { // Create new document in upload model
     var newUpload = new Upload({
-      _userid: req.user._id,
+      _user: req.user._id,
       title: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
@@ -74,15 +75,50 @@ exports.post = function(req, res, next) {
 
     return Upload.create(newUpload);
   })
-  .then(function(upl) {
+  .then(function(upl) { // Create response object
     upload = upl;
 
+    var options = [
+      {
+        model: 'Upload',
+        key: null,
+        options: {
+          findOne: true,
+          where: { _id: upl._id },
+          populate: '_user'
+        }
+      },
+      {
+        model: 'User',
+        key: 'user',
+        options: {
+          findOne: true,
+          where: { _id: upl._user },
+          populate: 'uploads'
+        }
+      }
+    ];
+    return resobj(options, req);
+  }).then(function(obj) { // Get user doc in order to save upload-ref in it
+    response = obj;
+
+    var options = {
+      findOne: true,
+      where: { _id: response.user.id },
+    };
+    return User.load(options);
+  })
+  .then(function(user) { // Save upload-ref in user doc
+    user.uploads.push(upload);
+    user.save();
+  })
+  .then(function() {
     // encrypt the temporary file using AES256 and
     // save the encrypted file in the userdir
     return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
   .then(function() {
-    res.json(upload.toObject());
+    res.json(response);
   })
   .catch(function(err) {
     next(err);
@@ -95,20 +131,34 @@ exports.post = function(req, res, next) {
  * @returns Array of Upload Objects
  */
 exports.list = function(req, res, next) {
-  var options = {
-    where: { _userid: req.user.id },
-    limit: req.param('limit'),
-    skip: req.param('skip')
-  };
+  var limit = req.param('limit') || 10;
+  var skip = req.param('skip') || 0;
 
-  Upload.load(options).then(function(docs) {
-    // docs is an array, and every item in this array is a mongooseDocument
-    // with the method toObject(). We need this toObject() of every document.
-    var toObjectDocs = _.map(docs, function(doc) { return doc.toObject(); });
+  var options = [
+    {
+      model: 'User',
+      key: 'user',
+      options: {
+        findOne: true,
+        where: { _id: req.user.id },
+        populate: 'uploads'
+      }
+    },
+    {
+      model: 'Upload',
+      key: 'uploads',
+      options: {
+        where: { _user: req.user.id },
+        skip: skip,
+        limit: limit,
+        populate: '_user'
+      }
+    }
+  ];
 
-    res.json(toObjectDocs);
-  })
-  .catch(function(err) {
+  resobj(options, req).then(function(response) {
+    res.json(response);
+  }).catch(function(err) {
     next(err);
   });
 }
@@ -119,16 +169,34 @@ exports.list = function(req, res, next) {
  * @returns Single Upload Object
  */
 exports.get = function(req, res, next) {
-  var options = {
-    findOne: true,
-    where: { _id: req.param('upload_id') }
-  };
-  Upload.load(options).then(function(doc) {
-    if(!doc) throw null;
-    res.json(doc.toObject());
-  })
-  .catch(function(err) {
-    next(err);
+  var uploadId = req.param('upload_id');
+
+  Upload.findOne({ _id: uploadId }).exec(function(err, doc) {
+    if(err) return next(err);
+    if(!doc) return next();
+
+    var output = [
+      {
+        model: 'Upload', key: null,
+        options: {
+          findOne: true,
+          where: { _id: req.param('upload_id') },
+          populate: '_user'
+        }
+      },
+      {
+        model: 'User', key: 'user',
+        options: {
+          findOne: true,
+          where: { _id: doc._user },
+          populate: 'uploads'
+        }
+      }
+    ];
+
+    resobj(output, req).then(function(response) {
+      res.json(response);
+    });
   });
 }
 
@@ -138,7 +206,8 @@ exports.get = function(req, res, next) {
 exports.show = function(req, res, next) {
   var options = {
     findOne: true,
-    where: { shortlink: req.param('shortlink') }
+    where: { shortlink: req.param('shortid') },
+    populate: '_user'
   };
 
   Upload.load(options)
