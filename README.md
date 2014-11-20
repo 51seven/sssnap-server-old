@@ -16,22 +16,30 @@ Visit the [Wiki](https://github.com/51seven/sssnap-server/wiki) to learn how use
 
 ### Running the server
 
-`npm start` Start in development environment  
-`npm run production` Start in production environment
+`npm start` **Start in development environment.**  
+
+* No authentication needed
+* Every request will be performed from a dummy user
+* Connect to database _sssnap-dev_
+
+`npm run production` **Start in production environment.**  
+
+* Authentication needed
+* Every request needs a valid access token
+* Connect to database _sssnap_
 
 Milestones
 ----------
 
 _also see [https://github.com/51seven/sssnap-server/milestones?state=open](https://github.com/51seven/sssnap-server/milestones?state=open)_
 
-**v0.2.x (started 2014-11-17)**
+**v0.2.0 (started 2014-11-17) (closed 2014-11-20)**
 - [x] Restrict access to uploads from others
 - [x] View private raw files
 - [x] Restrict non-images
-- [ ] User Quota Information
-- [ ] Thumbnails
+- [x] User Quota Information
 
-**v0.1.1 Improvement (started 2014-11-14) (closed 2014-11-16**  
+**v0.1.1 Improvement (started 2014-11-14) (closed 2014-11-16)**  
 - [x] Code cleaning
 - [x] Refactoring stuff
 - [x] Mongoose Schema improvement

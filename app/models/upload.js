@@ -25,7 +25,7 @@ var randString = function (len) {
  */
 
 var UploadSchema = new Schema({
-  _userid: {
+  _user: {
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
@@ -50,7 +50,7 @@ var UploadSchema = new Schema({
     required: true,
     unique: true
   },
-  shortlink: {
+  shortid: {
     type: String,
     required: true,
     unique: true
@@ -76,7 +76,7 @@ UploadSchema.statics = {
     var self = this;
     if(!count) count = 1;
     return new Promise(function(resolve, reject) {
-      newUpload.shortlink = randString(4);
+      newUpload.shortid = randString(4);
 
       // TODO: Test this error 11000 fallback
       newUpload.save(function(err, doc) {
@@ -107,9 +107,8 @@ UploadSchema.statics = {
       query.skip(options.skip);
       query.limit(options.limit);
     }
-    if(options.select) {
-      query.select(options.select)
-    }
+    if(options.select) query.select(options.select);
+    if(options.populate) query.populate(options.populate);
 
     return new Promise(function(resolve, reject) {
       query.exec(function(err, doc) {
@@ -141,10 +140,20 @@ UploadSchema.methods = {
  * Virtuals
  */
 
+UploadSchema.virtual('_userid')
+.get(function() {
+  return this._user._id;
+});
+
 UploadSchema.virtual('publicUrl')
 .get(function() {
   return this.generatePublicURL(this.destination, this._userid, this.filename);
 });
+
+UploadSchema.virtual('shortlink')
+.get(function() {
+  return config.host + this.shortid;
+})
 
 
 
@@ -156,9 +165,9 @@ if(!UploadSchema.options.toObject) UploadSchema.options.toObject = {};
 UploadSchema.options.toObject.transform = function (doc, ret, options) {
   return {
     id: ret._id,
-    userid: ret._userid,
+    userid: doc._userid,
     title: ret.title,
-    shortlink: config.host + '/' + ret.shortlink,
+    shortlink: doc.shortlink,
     views: ret.views,
     created: ret.created,
     info: {

@@ -3,6 +3,7 @@
  */
 
 var mongoose = require('mongoose')
+  , _ = require('lodash')
   , Promise = require('bluebird');
 
 var Upload = mongoose.model('Upload');
@@ -33,7 +34,17 @@ var UserSchema = new Schema({
   },
   imageUrl: {
     type: String
-  }
+  },
+  totalSpace: {
+    type: Number,
+    default: 10000000000
+  },
+  uploads: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Upload'
+    }
+  ]
 });
 
 /**
@@ -56,7 +67,8 @@ UserSchema.statics = {
 
         // user exists = update image
         else if(doc) {
-          self.findOneAndUpdate({ _id: mongoose.Types.ObjectId(doc._id) }, { imageUrl: opts.imageUrl }, function(err, doc) {
+          var query = self.findOneAndUpdate({ _id: doc._id }, { imageUrl: opts.imageUrl });
+          query.exec(function(err, doc) {
             if(err) reject(err);
             else resolve(doc);
           });
@@ -83,9 +95,8 @@ UserSchema.statics = {
       query.skip(options.skip);
       query.limit(options.limit);
     }
-    if(options.select) {
-      query.select(options.select)
-    }
+    if(options.select) query.select(options.select);
+    if(options.populate) query.populate(options.populate);
 
     return new Promise(function(resolve, reject) {
       query.exec(function(err, doc) {
@@ -93,8 +104,24 @@ UserSchema.statics = {
         else resolve(doc);
       });
     });
-  },
+  }
 }
+
+/**
+ * Virtuals
+ */
+
+UserSchema.virtual('uploadCount')
+.get(function() {
+  return this.uploads.length;
+});
+
+UserSchema.virtual('usedSpace')
+.get(function() {
+  var space = 0;
+  _.forEach(this.uploads, function(upload) { space += upload.size });
+  return space;
+});
 
 /**
  * Options
@@ -110,6 +137,11 @@ UserSchema.options.toObject.transform = function (doc, ret, options) {
     oauth: {
       provider: ret.provider,
       id: ret.externalId
+    },
+    quota: {
+      used: doc.usedSpace,
+      total: ret.totalSpace,
+      count: doc.uploadCount
     }
   }
 }
