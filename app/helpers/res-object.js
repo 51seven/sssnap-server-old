@@ -29,7 +29,7 @@ models.Upload = mongoose.model('Upload');
  */
 
 module.exports = function(struct, req) {
-  var build;
+  var build = {};
   var exclude = req.param('exclude') || undefined;
   var include = req.param('include') || undefined;
   var select = req.param('select');
@@ -67,7 +67,7 @@ module.exports = function(struct, req) {
     }, function(err) {
       if(err) reject(err);
       else {
-        var tmpsave = _.clone(build);
+        var tmpsave = JSON.parse(JSON.stringify(build));
         var toInc, arrayCheck, newPath, firstPath;
 
         // Delete excluded
@@ -106,6 +106,7 @@ module.exports = function(struct, req) {
           inArrPath = inc.split('.');
           inArrPath.shift();
           inArrPath = inArrPath.join('.');
+
 
           // Check if path exists
           if(objectPath.has(tmpsave, inc) || objectPath.has(tmpsave[firstPath][0], inArrPath)) {

@@ -20,8 +20,7 @@ var User = mongoose.model('User');
 exports.permission = function(req, res, next, uploadId) {
   var options = {
     findOne: true,
-    where: { _id: uploadId },
-    populate: ''
+    where: { _id: uploadId }
   };
   Upload.load(options).then(function(doc) {
     if(!doc) throw null;
@@ -58,15 +57,13 @@ exports.post = function(req, res, next) {
   var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
   var source = path.join(__dirname, '../../'+file.path);
   var dest = path.join(userdir, req.files.file.name);
-  var upload, dest, response;
+  var upload, response;
 
   var encryptFile = Promise.promisify(encryptor.encryptFile);
   var mkdir = Promise.promisify(mkdirp);
 
-  // Make userdir, if it doesn't exist
-  mkdir(userdir)
-  .then(function(dir) {
-    // Create new document in upload model
+  mkdir(userdir) // Make userdir, if it doesn't exist
+  .then(function(dir) { // Create new document in upload model
     var newUpload = new Upload({
       _user: req.user._id,
       title: file.originalname,
@@ -78,10 +75,9 @@ exports.post = function(req, res, next) {
 
     return Upload.create(newUpload);
   })
-  .then(function(upl) {
+  .then(function(upl) { // Create response object
     upload = upl;
 
-    // Create response object
     var options = [
       {
         model: 'Upload',
@@ -103,18 +99,16 @@ exports.post = function(req, res, next) {
       }
     ];
     return resobj(options, req);
-  }).then(function(obj) {
-    // Get user doc in order to save upload-ref in it
+  }).then(function(obj) { // Get user doc in order to save upload-ref in it
     response = obj;
+
     var options = {
       findOne: true,
       where: { _id: response.user.id },
-    }
-
+    };
     return User.load(options);
   })
-  .then(function(user) {
-    // Save upload-ref in user doc
+  .then(function(user) { // Save upload-ref in user doc
     user.uploads.push(upload);
     user.save();
   })
@@ -137,21 +131,34 @@ exports.post = function(req, res, next) {
  * @returns Array of Upload Objects
  */
 exports.list = function(req, res, next) {
-  var options = {
-    where: { _user: req.user.id },
-    limit: req.param('limit'),
-    skip: req.param('skip'),
-    populate: '_user'
-  };
+  var limit = req.param('limit') || 10;
+  var skip = req.param('skip') || 0;
 
-  Upload.load(options).then(function(docs) {
-    // docs is an array, and every item in this array is a mongooseDocument
-    // with the method toObject(). We need this toObject() of every document.
-    var toObjectDocs = _.map(docs, function(doc) { return doc.toObject(); });
+  var options = [
+    {
+      model: 'User',
+      key: 'user',
+      options: {
+        findOne: true,
+        where: { _id: req.user.id },
+        populate: 'uploads'
+      }
+    },
+    {
+      model: 'Upload',
+      key: 'uploads',
+      options: {
+        where: { _user: req.user.id },
+        skip: skip,
+        limit: limit,
+        populate: '_user'
+      }
+    }
+  ];
 
-    res.json(toObjectDocs);
-  })
-  .catch(function(err) {
+  resobj(options, req).then(function(response) {
+    res.json(response);
+  }).catch(function(err) {
     next(err);
   });
 }
@@ -162,20 +169,34 @@ exports.list = function(req, res, next) {
  * @returns Single Upload Object
  */
 exports.get = function(req, res, next) {
+  var uploadId = req.param('upload_id');
 
-  // Don't populate user here
-  // or you will suffer from a great pain
-  var options = {
-    findOne: true,
-    where: { _id: req.param('upload_id') },
-    populate: '_user'
-  };
-  Upload.load(options).then(function(doc) {
-    if(!doc) throw null;
-    res.json(doc.toObject());
-  })
-  .catch(function(err) {
-    next(err);
+  Upload.findOne({ _id: uploadId }).exec(function(err, doc) {
+    if(err) return next(err);
+    if(!doc) return next();
+
+    var output = [
+      {
+        model: 'Upload', key: null,
+        options: {
+          findOne: true,
+          where: { _id: req.param('upload_id') },
+          populate: '_user'
+        }
+      },
+      {
+        model: 'User', key: 'user',
+        options: {
+          findOne: true,
+          where: { _id: doc._user },
+          populate: 'uploads'
+        }
+      }
+    ];
+
+    resobj(output, req).then(function(response) {
+      res.json(response);
+    });
   });
 }
 
@@ -185,7 +206,8 @@ exports.get = function(req, res, next) {
 exports.show = function(req, res, next) {
   var options = {
     findOne: true,
-    where: { shortlink: req.param('shortlink') }
+    where: { shortlink: req.param('shortid') },
+    populate: '_user'
   };
 
   Upload.load(options)

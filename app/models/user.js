@@ -104,7 +104,7 @@ UserSchema.statics = {
         else resolve(doc);
       });
     });
-  },
+  }
 }
 
 /**

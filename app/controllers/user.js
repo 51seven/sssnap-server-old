@@ -56,7 +56,6 @@ function getUser(user) {
  * @returns Single User Object
  */
 exports.get = function(req, res, next) {
-  var populate = {};
   var limit = req.param('limit') || 10;
   var skip = req.param('skip') || 0;
 
