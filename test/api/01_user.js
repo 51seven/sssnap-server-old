@@ -3,6 +3,10 @@ var should = require('should');
 
 var app = require('../../app');
 
+var userProperties = ['id', 'name', 'email', 'image', 'oauth', 'quota'];
+var userOauthProperties = ['provider', 'id'];
+var userQuotaProperties = ['used', 'total', 'count'];
+
 describe('API User Routes', function() {
   describe('GET /api/user', function() {
     it('should return the user object', function(done) {
@@ -12,19 +16,9 @@ describe('API User Routes', function() {
         .set('Accept', 'application/json')
         .expect(200)
         .end(function(err, res) {
-          res.body.should.have.properties({
-            name: 'John Doe',
-            email: 'johndoe@gmail.com',
-            image: 'https://lh4.googleusercontent.com/-xUelHR_l_mk/AAAAAAAAAAI/AAAAAAAACS4/zvs8v_wLjyo/photo.jpg',
-            oauth: {
-              provider: 'google',
-              id: '113540964082774770000'
-            },
-            uploads: {
-              total: 0,
-              used: 0
-            }
-          });
+          res.body.should.have.properties(userProperties);
+          res.body.oauth.should.have.properties(userOauthProperties);
+          res.body.quota.should.have.properties(userQuotaProperties);
           done();
         });
     })

@@ -2,12 +2,18 @@ var request = require('supertest');
 var should = require('should');
 
 var app = require('../../app');
+
+var uploadProperties = ['id', 'userid', 'title', 'shortlink', 'views', 'created', 'info'];
+var uploadInfoProperties = ['publicUrl', 'size', 'mimetype']
+var userProperties = ['id', 'name', 'email', 'image', 'oauth', 'quota'];
+var userOauthProperties = ['provider', 'id'];
+var userQuotaProperties = ['used', 'total', 'count'];
+
 describe('API Upload Routes', function() {
-  var uploadId;
-  var shortlink;
+  var uploadId, userId, shortlink;
 
   describe('POST /api/upload', function() {
-    it('should return a new upload object', function(done) {
+    it('should return a correct upload response object', function(done) {
       request(app)
         .post('/api/upload')
         .attach('file', 'test/files/funnydog.png')
@@ -16,7 +22,13 @@ describe('API Upload Routes', function() {
         .end(function(err, res) {
           uploadId = res.body.id;
           shortlink = res.body.shortlink;
-          res.body.should.have.property('title', 'funnydog.png');
+          userId = res.body.user.id;
+          res.body.title.should.eql('funnydog.png');
+          res.body.should.have.properties(uploadProperties);
+          res.body.info.should.have.properties(uploadInfoProperties);
+          res.body.user.should.have.properties(userProperties);
+          res.body.user.oauth.should.have.properties(userOauthProperties);
+          res.body.user.quota.should.have.properties(userQuotaProperties);
           done();
         });
     });
@@ -37,8 +49,17 @@ describe('API Upload Routes', function() {
         .set('Accept', 'application/json')
         .expect(200)
         .end(function(err, res) {
-          res.body.should.be.an.Array.and.have.lengthOf(1);
-          res.body[0].should.have.property('id', uploadId);
+          res.body.should.have.properties('user', 'uploads');
+          res.body.user.should.have.properties(userProperties);
+          res.body.user.oauth.should.have.properties(userOauthProperties);
+          res.body.user.quota.should.have.properties(userQuotaProperties);
+          res.body.user.id.should.eql(userId);
+          // Is the upload in the upload object?
+          res.body.uploads.should.be.an.Array.and.have.lengthOf(1);
+          res.body.uploads[0].should.have.properties(uploadProperties);
+          res.body.uploads[0].info.should.have.properties(uploadInfoProperties);
+          // Is the correct upload in the upload object?
+          res.body.uploads[0].id.should.eql(uploadId);
           done();
         });
     })
@@ -47,10 +68,20 @@ describe('API Upload Routes', function() {
   describe('GET /api/upload/:upload_id', function() {
     it('should return the uploaded file', function(done) {
       request(app)
-        .get('/app/upload/'+uploadId)
+        .get('/api/upload/'+uploadId)
         .set('Accept', 'application/json')
-        .expect(200);
-      done();
+        .expect(200)
+        .end(function(err, res) {
+          res.body.should.have.properties(uploadProperties);
+          res.body.info.should.have.properties(uploadInfoProperties);
+          res.body.id.should.eql(uploadId);
+          res.body.user.should.have.properties(userProperties);
+          res.body.user.oauth.should.have.properties(userOauthProperties);
+          res.body.user.quota.should.have.properties(userQuotaProperties);
+          res.body.user.id.should.eql(userId);
+          res.body.shortlink.should.eql(shortlink);
+          done();
+        });
     });
 
     it('should throw a 404 when no file is found', function(done) {
