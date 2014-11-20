@@ -70,12 +70,12 @@ describe('Request Object Builder', function() {
   });
   it('should exclude and include nested keys in an array', function(done) {
     request(app)
-      .get('/api/upload?exclude=uploads.info&include=uploads.info.size')
+      .get('/api/upload?exclude=uploads&include=uploads.id')
       .set('Accept', 'application/json')
       .expect(200)
       .end(function(err, res) {
-        res.body.uploads[0].info.should.not.have.property('publicUrl');
-        res.body.uploads[0].info.should.have.property('size');
+        res.body.uploads[0].should.not.have.property('userid');
+        res.body.uploads[0].should.have.property('id');
         done();
       });
   });

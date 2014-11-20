@@ -170,11 +170,9 @@ UploadSchema.options.toObject.transform = function (doc, ret, options) {
     shortlink: doc.shortlink,
     views: ret.views,
     created: ret.created,
-    info: {
-      publicUrl: doc.publicUrl,
-      size: ret.size,
-      mimetype: ret.mimetype
-    }
+    publicUrl: doc.publicUrl,
+    size: ret.size,
+    mimetype: ret.mimetype
   }
 }
 
