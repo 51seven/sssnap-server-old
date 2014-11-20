@@ -24,7 +24,7 @@ exports.permission = function(req, res, next, uploadId) {
   };
   Upload.load(options).then(function(doc) {
     if(!doc) throw null;
-    if(doc._user != req.user.id) throw new status.Forbidden('Access denied.');
+    if(doc._user != req.user.id) throw new status.Forbidden(000, 'Access denied', 'You have no permissions to perform this action.');
     else next();
   })
   .catch(function(err) {
@@ -48,11 +48,11 @@ exports.post = function(req, res, next) {
   var file = req.files.file;
 
   // Bad Request when no file was uploaded
-  if(!file) return next(status.BadRequest('No file found.'));
+  if(!file) return next(status.BadRequest(000, 'File not found', 'Use \'file\' as the key in your multipart/form-data request.'));
 
   // Bad Request when wrong mimetype was uploaded
   if(file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg') {
-    return next(status.BadRequest('Wrong image mimetype. Only image/png and image/jpeg files are allowed.'));
+    return next(status.BadRequest(000, 'Invalid file mimetype', 'Only image/png and image/jpeg files are allowed.'));
   }
   var userdir = path.join(__dirname, '../../uploads/'+req.user._id);
   var source = path.join(__dirname, '../../'+file.path);

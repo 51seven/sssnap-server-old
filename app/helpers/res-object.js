@@ -1,5 +1,9 @@
 /**
  * Response Object Builder
+ *
+ * I posted this as a gist because
+ * this is really neat, imo.
+ * https://gist.github.com/verwebbt/db90aaff4d75d182fb3f
  */
 
 var _ = require('lodash')

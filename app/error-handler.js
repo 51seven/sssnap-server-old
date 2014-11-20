@@ -25,9 +25,11 @@ module.exports = function(app) {
       }
       else {
         res.send({
-          error: err.status,
+          code: err.code,
+          status: err.status,
           message: err.message,
-          info: err
+          info: err.info,
+          stack: err
         });
       }
     });
@@ -45,8 +47,10 @@ module.exports = function(app) {
     }
     else {
       res.send({
-        error: err.status,
-        message: err.message
+        code: err.code,
+        status: err.status,
+        message: err.message,
+        info: err.info
       });
     }
   });

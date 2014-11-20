@@ -54,7 +54,7 @@ exports.publicShow = function(req, res, next) {
     // Check if Signature is valid
     // or if Signature is expired
     if(Signature !== key || (dateCompare > 60000 || dateCompare < -60000)) {
-      return next(new status.Forbidden('Access to file invalid or expired.'));
+      return next(new status.Forbidden(000, 'Access invalid or expired', 'Either the link is expired or the signature in the link is wrong. A link is valid for 60 seconds.'));
     }
 
     if(!doc) return next();
@@ -77,7 +77,7 @@ exports.privateShow = function(req, res, next) {
     , filename = req.param('filename');
 
   if(!req.param('access_token') || !req.param('provider')) {
-    return next(new status.BadRequest('Access only with URL parameter. Static files can only be accessed using your access_token and provider information in the URL.'))
+    return next(new status.BadRequest(000, 'Access only with URL parameter', 'Static files can only be accessed using your access_token and provider information in the URL.'))
   }
 
   var options = {

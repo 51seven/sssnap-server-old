@@ -20,7 +20,7 @@ module.exports = function(req, res, next) {
   else access_token = req.param('access_token');
 
   if (access_token === undefined) {
-    return next(new status.Forbidden('Access token not found. Send the access token in the HTTP Authorization Header or in the URL.'));
+    return next(new status.Forbidden(000, 'Access token not found', 'You have to send an access token from a supported provider in the HTTP Authorization Header or in the URL.'));
   }
 
   google.callAPI('/oauth2/v1/tokeninfo?access_token=' + access_token, access_token).then(function(token) {
@@ -29,12 +29,12 @@ module.exports = function(req, res, next) {
 
     // Restrict clients
     if(tokenInfo.audience ==! '407408718192.apps.googleusercontent.com' || tokenInfo.audience ==! '947766948-22hqf8ngu94rmepn5m0ucp5a6mo4jsak.apps.googleusercontent.com') {
-      return next(new status.Forbidden('Client not authorized. You have to use an authorized client in order to access the API.'));
+      return next(new status.Forbidden(000, 'Client not authorized', 'The client you use is not authorized to access the API. You have to use an authorized client.'));
     }
 
     // Check correct scopes
     if(scopes.indexOf('https://www.googleapis.com/auth/plus.me') === -1 || scopes.indexOf('https://www.googleapis.com/auth/userinfo.email') === -1) {
-      throw new status.Forbidden('Access token has wrong scopes. userinfo.email and plus.me scope is required.');
+      throw new status.Forbidden(000, 'Access token with wrong scopes', 'userinfo.email and plus.me scope is required when using Google as OAuth2.0 provider.');
     }
 
     // Get user from db
@@ -54,7 +54,7 @@ module.exports = function(req, res, next) {
     // if no user is found and won't be created as next step,
     // no further action can be performed
     if(req.originalUrl !== '/api/user' && req.user === undefined) {
-      throw new status.Forbidden('User is not yet in the database. Authorization was successful. Call /api/user to authenticate the user.');
+      throw new status.Forbidden(000, 'User not in database', 'Authorization was successful but the user is not yet in the database. Call /api/user to authenticate the user and register him.');
     }
 
     return next();
