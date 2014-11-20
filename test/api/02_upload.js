@@ -3,8 +3,7 @@ var should = require('should');
 
 var app = require('../../app');
 
-var uploadProperties = ['id', 'userid', 'title', 'shortlink', 'views', 'created', 'info'];
-var uploadInfoProperties = ['publicUrl', 'size', 'mimetype']
+var uploadProperties = ['id', 'userid', 'title', 'shortlink', 'views', 'created', 'publicUrl', 'size', 'mimetype'];
 var userProperties = ['id', 'name', 'email', 'image', 'oauth', 'quota'];
 var userOauthProperties = ['provider', 'id'];
 var userQuotaProperties = ['used', 'total', 'count'];
@@ -25,7 +24,6 @@ describe('API Upload Routes', function() {
           userId = res.body.user.id;
           res.body.title.should.eql('funnydog.png');
           res.body.should.have.properties(uploadProperties);
-          res.body.info.should.have.properties(uploadInfoProperties);
           res.body.user.should.have.properties(userProperties);
           res.body.user.oauth.should.have.properties(userOauthProperties);
           res.body.user.quota.should.have.properties(userQuotaProperties);
@@ -57,7 +55,6 @@ describe('API Upload Routes', function() {
           // Is the upload in the upload object?
           res.body.uploads.should.be.an.Array.and.have.lengthOf(1);
           res.body.uploads[0].should.have.properties(uploadProperties);
-          res.body.uploads[0].info.should.have.properties(uploadInfoProperties);
           // Is the correct upload in the upload object?
           res.body.uploads[0].id.should.eql(uploadId);
           done();
@@ -73,7 +70,6 @@ describe('API Upload Routes', function() {
         .expect(200)
         .end(function(err, res) {
           res.body.should.have.properties(uploadProperties);
-          res.body.info.should.have.properties(uploadInfoProperties);
           res.body.id.should.eql(uploadId);
           res.body.user.should.have.properties(userProperties);
           res.body.user.oauth.should.have.properties(userOauthProperties);
