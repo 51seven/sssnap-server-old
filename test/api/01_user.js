@@ -8,11 +8,11 @@ var userOauthProperties = ['provider', 'id'];
 var userQuotaProperties = ['used', 'total', 'count'];
 
 describe('API User Routes', function() {
-  describe('GET /api/user', function() {
+  describe('GET /api/user/me', function() {
     it('should return the user object', function(done) {
       var mongoose = require('mongoose');
       request(app)
-        .get('/api/user')
+        .get('/api/user/me')
         .set('Accept', 'application/json')
         .expect(200)
         .end(function(err, res) {

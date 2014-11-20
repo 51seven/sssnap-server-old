@@ -53,7 +53,7 @@ module.exports = function(req, res, next) {
 
     // if no user is found and won't be created as next step,
     // no further action can be performed
-    if(req.originalUrl !== '/api/user' && req.user === undefined) {
+    if(req.originalUrl !== '/api/user/me' && req.user === undefined) {
       throw new status.Forbidden(000, 'User not in database', 'Authorization was successful but the user is not yet in the database. Call /api/user to authenticate the user and register him.');
     }
 

@@ -9,7 +9,7 @@ var router = express.Router();
 
 var controller = require('../../controllers/user');
 
-router.route('/')
+router.route('/me')
 .get(controller.get);
 //.put(controller.put)
 //.delete(controller.delete);
