@@ -65,7 +65,7 @@ exports.get = function(req, res, next) {
     var options = [
       {
         model: 'User',
-        key: null,
+        key: 'user',
         options: {
           findOne: true,
           where: { _id: user._id },
