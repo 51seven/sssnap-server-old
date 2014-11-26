@@ -17,7 +17,7 @@ describe('API Upload Routes', function() {
         .post('/api/upload')
         .attach('file', 'test/files/funnydog.png')
         .set('Accept', 'application/json')
-        .expect(200)
+        .expect(201)
         .end(function(err, res) {
           uploadId = res.body.id;
           shortlink = res.body.shortlink;

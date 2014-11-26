@@ -118,7 +118,7 @@ exports.post = function(req, res, next) {
     return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
   })
   .then(function() {
-    res.json(response);
+    res.status(201).json(response);
   })
   .catch(function(err) {
     next(err);
