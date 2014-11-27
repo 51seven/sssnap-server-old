@@ -75,16 +75,27 @@ exports.post = function(req, res, next) {
 
     return Upload.create(newUpload);
   })
-  .then(function(upl) { // Create response object
+  .then(function(upl) { // Find user doc ...
     upload = upl;
 
+    var options = {
+      findOne: true,
+      where: { _id: req.user._id },
+    };
+    return User.load(options);
+  })
+  .then(function(user) { // ... and add the upload to it
+    user.uploads.push(upload);
+    user.save();
+  })
+  .then(function() { // Build response object
     var options = [
       {
         model: 'Upload',
         key: null,
         options: {
           findOne: true,
-          where: { _id: upl._id },
+          where: { _id: upload._id },
           populate: '_user'
         }
       },
@@ -93,26 +104,15 @@ exports.post = function(req, res, next) {
         key: 'user',
         options: {
           findOne: true,
-          where: { _id: upl._user },
+          where: { _id: upload._user },
           populate: 'uploads'
         }
       }
     ];
     return resobj(options, req);
-  }).then(function(obj) { // Get user doc in order to save upload-ref in it
-    response = obj;
-
-    var options = {
-      findOne: true,
-      where: { _id: response.user.id },
-    };
-    return User.load(options);
   })
-  .then(function(user) { // Save upload-ref in user doc
-    user.uploads.push(upload);
-    user.save();
-  })
-  .then(function() {
+  .then(function(resobj) {
+    response = resobj;
     // encrypt the temporary file using AES256 and
     // save the encrypted file in the userdir
     return encryptFile(source, dest, config.aes.key, { algorithm: config.aes.algorithm });
