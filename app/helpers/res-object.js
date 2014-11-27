@@ -58,8 +58,11 @@ module.exports = function(struct, req) {
             build[part.key] = doc.toObject();
         }
         else {
-          if(!part.options.findOne)
+          if(!part.options.findOne) {
+            // this scenario will almost never happen
+            /* istanbul ignore next */
             build = _.map(doc, function(d) { return d.toObject(); });
+          }
           else
             build = doc.toObject();
         }
