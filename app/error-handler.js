@@ -25,7 +25,6 @@ module.exports = function(app) {
       }
       else {
         res.send({
-          code: err.code,
           status: err.status,
           message: err.message,
           info: err.info,
@@ -47,7 +46,6 @@ module.exports = function(app) {
     }
     else {
       res.send({
-        code: err.code,
         status: err.status,
         message: err.message,
         info: err.info
