@@ -159,6 +159,7 @@ exports.list = function(req, res, next) {
   resobj(options, req).then(function(response) {
     res.json(response);
   }).catch(function(err) {
+    /* istanbul ignore next */
     next(err);
   });
 }

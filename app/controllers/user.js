@@ -13,6 +13,7 @@ var User = mongoose.model('User');
 
 function getUser(user) {
   return new Promise(function(resolve, reject) {
+    /* istanbul ignore else  */
     if(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
       resolve(user);
     } else {

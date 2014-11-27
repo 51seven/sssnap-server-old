@@ -6,6 +6,7 @@ var https = require('https')
   , Promise = require('bluebird');
 var status = require('./status');
 
+/* istanbul ignore next */
 exports.callAPI = function(path, access_token) {
   return new Promise(function(resolve, reject) {
     https.get({

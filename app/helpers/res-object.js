@@ -66,6 +66,7 @@ module.exports = function(struct, req) {
         callback();
       })
       .catch(function(err) {
+        /* istanbul ignore next */
         callback(err);
       });
     }, function(err) {

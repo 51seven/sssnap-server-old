@@ -10,6 +10,7 @@ var User = mongoose.model('User');
 module.exports = function(req, res, next) {
   var provider = req.get('x-auth-provider') || req.query.provider;
 
+  /* istanbul ignore else  */
   if(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     var testuser = new User({
       name: "John Doe",
@@ -24,6 +25,7 @@ module.exports = function(req, res, next) {
     });
   }
 
+  // I don't know how to test the authentication process
   else {
 
     switch(provider) {
