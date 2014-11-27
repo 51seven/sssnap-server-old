@@ -1,3 +1,7 @@
+String.prototype.replaceAt=function(index, character) {
+    return this.substr(0, index) + character + this.substr(index+character.length);
+}
+
 var request = require('supertest');
 var should = require('should');
 
@@ -9,7 +13,7 @@ var userOauthProperties = ['provider', 'id'];
 var userQuotaProperties = ['used', 'total', 'count'];
 
 describe('API Upload Routes', function() {
-  var uploadId, userId, shortlink;
+  var uploadId, userId, shortlink, publicUrl, falsePublicUrl;
 
   describe('POST /api/upload', function() {
     it('should return a correct upload response object', function(done) {
@@ -21,6 +25,9 @@ describe('API Upload Routes', function() {
         .end(function(err, res) {
           uploadId = res.body.id;
           shortlink = res.body.shortlink;
+          var publicFullUrl = res.body.publicUrl;
+          publicUrl = publicFullUrl.replace('https://localhost:3000', '');
+          falsePublicUrl = publicUrl.replaceAt(11, '=');
           userId = res.body.user.id;
           res.body.title.should.eql('funnydog.png');
           res.body.should.have.properties(uploadProperties);
@@ -35,8 +42,14 @@ describe('API Upload Routes', function() {
       request(app)
         .post('/api/upload')
         .set('Accept', 'application/json')
-        .expect(400);
-      done();
+        .expect(400, done);
+    });
+
+    it('should not allow other files than jpeg and png', function(done) {
+      request(app)
+        .post('/api/upload')
+        .set('Accept', 'application/json')
+        .expect(400, done);
     });
   });
 
@@ -82,10 +95,9 @@ describe('API Upload Routes', function() {
 
     it('should throw a 404 when no file is found', function(done) {
       request(app)
-        .get('/app/upload/meh')
+        .get('/api/upload/meh')
         .set('Accept', 'application/json')
-        .expect(404);
-      done();
+        .expect(404, done);
     });
   });
 
@@ -95,15 +107,27 @@ describe('API Upload Routes', function() {
       var shortid = splitshortlink[splitshortlink.length -1];
       request(app)
         .get('/'+shortid)
-        .expect(200);
-      done();
+        .expect(200, done)
     });
 
     it('should throw a 404 when no file is found', function(done) {
       request(app)
-        .get('test123')
-        .expect(404);
-      done();
+        .get('/test123')
+        .expect(404, done);
+    });
+  });
+
+  describe('GET /files/pub/:key/:timestamp/:userid/:filename', function(done) {
+    it('should return the decrypted file with correct link', function(done) {
+      request(app)
+        .get(publicUrl)
+        .expect(200, done);
+    });
+
+    it('should reject access with a false link', function(done) {
+      request(app)
+        .get(falsePublicUrl)
+        .expect(403, done);
     });
   });
 });

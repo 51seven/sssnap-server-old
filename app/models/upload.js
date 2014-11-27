@@ -111,9 +111,10 @@ UploadSchema.statics = {
     if(options.populate) query.populate(options.populate);
 
     return new Promise(function(resolve, reject) {
-      query.exec(function(err, doc) {
-        if(err) reject(err);
-        else resolve(doc);
+      query.exec().then(function(doc) {
+        resolve(doc);
+      }, function(err) {
+        reject(err);
       });
     });
   }

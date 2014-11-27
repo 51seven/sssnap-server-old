@@ -28,7 +28,7 @@ exports.permission = function(req, res, next, uploadId) {
     else next();
   })
   .catch(function(err) {
-    next(err);
+    return next(null);
   });
 }
 
@@ -169,10 +169,12 @@ exports.list = function(req, res, next) {
  * @returns Single Upload Object
  */
 exports.get = function(req, res, next) {
-  var uploadId = req.param('upload_id');
+  var options = {
+    findOne: true,
+    where: { _id: req.param('upload_id') }
+  };
 
-  Upload.findOne({ _id: uploadId }).exec(function(err, doc) {
-    if(err) return next(err);
+  Upload.load(options).then(function(doc) {
     if(!doc) return next();
 
     var output = [
@@ -197,6 +199,9 @@ exports.get = function(req, res, next) {
     resobj(output, req).then(function(response) {
       res.json(response);
     });
+  })
+  .catch(function(err) {
+    return next();
   });
 }
 
@@ -206,7 +211,7 @@ exports.get = function(req, res, next) {
 exports.show = function(req, res, next) {
   var options = {
     findOne: true,
-    where: { shortlink: req.param('shortid') },
+    where: { shortid: req.param('shortid') },
     populate: '_user'
   };
 
