@@ -48,6 +48,7 @@ describe('API Upload Routes', function() {
     it('should not allow other files than jpeg and png', function(done) {
       request(app)
         .post('/api/upload')
+        .attach('file', 'test/files/fuckthis.gif')
         .set('Accept', 'application/json')
         .expect(400, done);
     });

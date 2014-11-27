@@ -14,6 +14,7 @@ module.exports = function(app) {
 
   // development error handler
   // will print stacktrace
+  /* istanbul ignore if */
   if (app.get('env') === 'development') {
     app.use(function(err, req, res, next) {
       res.status(err.status || 500);
@@ -25,7 +26,6 @@ module.exports = function(app) {
       }
       else {
         res.send({
-          code: err.code,
           status: err.status,
           message: err.message,
           info: err.info,
@@ -47,7 +47,6 @@ module.exports = function(app) {
     }
     else {
       res.send({
-        code: err.code,
         status: err.status,
         message: err.message,
         info: err.info

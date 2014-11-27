@@ -13,6 +13,7 @@ var User = mongoose.model('User');
 
 function getUser(user) {
   return new Promise(function(resolve, reject) {
+    /* istanbul ignore else  */
     if(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
       resolve(user);
     } else {
@@ -22,7 +23,7 @@ function getUser(user) {
       google.callAPI('/plus/v1/people/' + tokenInfo.user_id, access_token)
       .then(function(userInfo) {
         if(userInfo.error) {
-          reject(status.Forbidden(userInfo.error.message));
+          reject(status.Forbidden('Google API Error', userInfo.error.message));
         }
 
         // save image url

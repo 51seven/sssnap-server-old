@@ -10,10 +10,9 @@
  * @param {String} info More infos for that error
  * @return {Error}  Error Object with status 403
  */
-exports.Forbidden = function(code, message, info) {
+exports.Forbidden = function(message, info) {
   var err = new Error(message);
   err.status = 403;
-  err.code = code;
   err.info = info;
   return err;
 }
@@ -25,10 +24,9 @@ exports.Forbidden = function(code, message, info) {
  * @param {String} info More infos for that error
  * @return {Error}  Error Object with status 400
  */
-exports.BadRequest = function(code, message, info) {
+exports.BadRequest = function(message, info) {
   var err = new Error(message);
   err.status = 400;
-  err.code = code;
   err.info = info;
   return err;
 }
