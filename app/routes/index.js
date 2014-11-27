@@ -14,7 +14,7 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/:shortlink', require('../controllers/upload').show);
+router.get('/:shortid', require('../controllers/upload').show);
 
 
 module.exports = router;
