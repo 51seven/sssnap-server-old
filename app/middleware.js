@@ -42,7 +42,7 @@ module.exports = function(app) {
   // bodyParser parses application/*
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(cookieParser());
+  app.use(cookieParser(config.secret.signkey));
 
   // path for static files
   app.use(express.static(path.join(__dirname, './public')));

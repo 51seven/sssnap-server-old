@@ -223,7 +223,11 @@ exports.show = function(req, res, next) {
     // a error for this, just escape the promise.
     if(!doc) throw null;
 
-    res.render('view', { image: doc.publicUrl })
+    // Set cookie if there is none
+    if(req.signedCookies.s_uplCivs !== 1)
+      res.cookie('s_uplCvis', '1', { path: req.path, signed: true, expires: new Date(Date.now() + 315569259747)});
+
+    res.render('view', { image: doc.publicUrl });
   })
   .catch(function(err) {
     next(err);
