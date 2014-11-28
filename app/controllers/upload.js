@@ -224,8 +224,15 @@ exports.show = function(req, res, next) {
     if(!doc) throw null;
 
     // Set cookie if there is none
-    if(req.signedCookies.s_uplCvis !== '1')
+    if(req.signedCookies.s_uplCvis !== '1') {
       res.cookie('s_uplCvis', '1', { path: req.path, signed: true, expires: new Date(Date.now() + 315569259747)});
+
+      // This update is an unsafe write because it has no callback.
+      // However, updating the counter is much less important than
+      // showing the real upload, so an error in this exec() will
+      // simply vanish into space and the viewcounter won't increment.
+      doc.update({ $inc: { views: 1 }}).exec();
+    }
 
     res.render('view', { image: doc.publicUrl });
   })
