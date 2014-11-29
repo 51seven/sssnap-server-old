@@ -5,7 +5,7 @@ String.prototype.replaceAt=function(index, character) {
 var request = require('supertest');
 var should = require('should');
 
-var app = require('../../app');
+var app = require('../../app').express;
 
 var uploadProperties = ['id', 'userid', 'title', 'shortlink', 'views', 'created', 'publicUrl', 'size', 'mimetype'];
 var userProperties = ['id', 'name', 'email', 'image', 'oauth', 'quota'];

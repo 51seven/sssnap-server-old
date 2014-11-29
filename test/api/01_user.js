@@ -1,7 +1,7 @@
 var request = require('supertest');
 var should = require('should');
 
-var app = require('../../app');
+var app = require('../../app').express;
 
 var userProperties = ['id', 'name', 'email', 'image', 'oauth', 'quota'];
 var userOauthProperties = ['provider', 'id'];
