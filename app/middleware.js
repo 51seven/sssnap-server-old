@@ -17,7 +17,7 @@ var express = require('express')
   , config = require('config')
   , autoReap = require('multer-autoreap');;
 
-module.exports = function(app) {
+module.exports = function(app, sio) {
 
   app.use(cors());
   // view engine setup
@@ -49,4 +49,9 @@ module.exports = function(app) {
 
   // override HTTP Verbs, such as PUT and DELETE
   app.use(methodOverride());
+
+  app.use(function(req, res, next) {
+    req.io = sio;
+    next();
+  });
 };

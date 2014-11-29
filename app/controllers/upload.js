@@ -210,9 +210,10 @@ exports.get = function(req, res, next) {
  * render the upload view
  */
 exports.show = function(req, res, next) {
+  var shortid = req.param('shortid');
   var options = {
     findOne: true,
-    where: { shortid: req.param('shortid') },
+    where: { shortid: shortid },
     populate: '_user'
   };
 
@@ -231,9 +232,13 @@ exports.show = function(req, res, next) {
       // However, updating the counter is much less important than
       // showing the real upload, so an error in this exec() will
       // simply vanish into space and the viewcounter won't increment.
-      doc.update({ $inc: { views: 1 }}).exec();
+      doc.update({ $inc: { views: 1 }}).exec(function(err, success) {
+        // When the doc was updated emit the new viewcounter
+        // to the room with the shortid from the URL
+        if(success)
+          req.io.sockets.emit(shortid, { views: doc.views + 1});
+      });
     }
-
     res.render('view', { image: doc.publicUrl });
   })
   .catch(function(err) {
