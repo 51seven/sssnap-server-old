@@ -17,7 +17,7 @@ var express = require('express')
   , config = require('config')
   , autoReap = require('multer-autoreap');;
 
-module.exports = function(app) {
+module.exports = function(app, sio) {
 
   app.use(cors());
   // view engine setup
@@ -42,11 +42,16 @@ module.exports = function(app) {
   // bodyParser parses application/*
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(cookieParser());
+  app.use(cookieParser(config.secret.signkey));
 
   // path for static files
   app.use(express.static(path.join(__dirname, './public')));
 
   // override HTTP Verbs, such as PUT and DELETE
   app.use(methodOverride());
+
+  app.use(function(req, res, next) {
+    req.io = sio;
+    next();
+  });
 };

@@ -4,8 +4,9 @@ String.prototype.replaceAt=function(index, character) {
 
 var request = require('supertest');
 var should = require('should');
+var Qs = require('qs');
 
-var app = require('../../app');
+var app = require('../../app').express;
 
 var uploadProperties = ['id', 'userid', 'title', 'shortlink', 'views', 'created', 'publicUrl', 'size', 'mimetype'];
 var userProperties = ['id', 'name', 'email', 'image', 'oauth', 'quota'];
@@ -25,10 +26,16 @@ describe('API Upload Routes', function() {
         .end(function(err, res) {
           uploadId = res.body.id;
           shortlink = res.body.shortlink;
+          userId = res.body.user.id;
+
+          // manipulate publicUrl for later tests
           var publicFullUrl = res.body.publicUrl;
           publicUrl = publicFullUrl.replace('https://localhost:3000', '');
-          falsePublicUrl = publicUrl.replaceAt(11, '=');
-          userId = res.body.user.id;
+          publicUrlQs = Qs.parse(publicUrl.split('?')[1]);
+          var oldExpires = publicUrlQs.Expires*1;
+          var newExpires = oldExpires + 1;
+          falsePublicUrl = publicUrl.replace(oldExpires, newExpires);
+
           res.body.title.should.eql('funnydog.png');
           res.body.should.have.properties(uploadProperties);
           res.body.user.should.have.properties(userProperties);
@@ -118,7 +125,7 @@ describe('API Upload Routes', function() {
     });
   });
 
-  describe('GET /files/pub/:key/:timestamp/:userid/:filename', function(done) {
+  describe('GET /files/pub/:userid/:filename', function(done) {
     it('should return the decrypted file with correct link', function(done) {
       request(app)
         .get(publicUrl)

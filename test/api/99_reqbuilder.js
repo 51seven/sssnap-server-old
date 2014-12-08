@@ -1,7 +1,7 @@
 var request = require('supertest');
 var should = require('should');
 
-var app = require('../../app');
+var app = require('../../app').express;
 
 describe('Request Object Builder', function() {
   it('should exclude a normal key', function(done) {

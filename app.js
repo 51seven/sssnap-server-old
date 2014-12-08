@@ -3,6 +3,7 @@
  */
 
 var express = require('express')
+  , sio = require('socket.io')()
   , mongoose = require('mongoose')
   , fs = require('fs')
   , config = require('config');
@@ -46,7 +47,7 @@ var app = express();
 // Mount the middleware to the express
 // app, e.g. the body parser, logger,
 // view engines, ...
-require('./app/middleware')(app);
+require('./app/middleware')(app, sio);
 
 // All requests will be passed to the
 // router and `function(req, res)` will
@@ -61,7 +62,8 @@ require('./app/error-handler')(app);
 // After the errorHandler everything
 // is processed. */
 
-module.exports = app;
+module.exports.express = app;
+module.exports.sio = sio;
 
 // The app will be passed to bin/www
 // where the server will be started.

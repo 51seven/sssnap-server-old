@@ -36,8 +36,8 @@ function decrypt(destination) {
 }
 
 exports.publicShow = function(req, res, next) {
-  var key = req.param('key')
-    , timestamp = req.param('timestamp')
+  var key = req.query.Signature
+    , timestamp = req.query.Expires
     , userid = req.param('userid')
     , filename = req.param('filename');
   var time = new Date(timestamp*1);
@@ -47,6 +47,8 @@ exports.publicShow = function(req, res, next) {
     where: { _user: userid, filename: filename }
   };
   Upload.load(options).then(function(doc) {
+    if(!doc) throw null;
+
     var destination = doc.destination;
     var Signature = hmac.createSignature(destination, userid, filename, time);
     var dateCompare = (new Date) - time;

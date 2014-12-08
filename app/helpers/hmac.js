@@ -43,6 +43,7 @@ exports.createSignature = function (destination, userid, filename, time) {
  * @return {String} full URL
  */
 exports.generateURL = function (signature, userid, filename, time) {
-  var url = config.host + 'files/pub/' + signature + '/' + time.getTime() + '/' + userid + '/' + filename;
+  var url = config.host + "files/pub/" + userid + "/" + filename + "?Expires=" + time.getTime() + "&Signature=" + signature;
+
   return url;
 }

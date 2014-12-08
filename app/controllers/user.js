@@ -80,7 +80,8 @@ exports.get = function(req, res, next) {
           where: { _user: user._id },
           skip: skip,
           limit: limit,
-          populate: '_user'
+          populate: '_user',
+          sort: '-created'
         }
       }
     ]

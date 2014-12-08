@@ -151,7 +151,8 @@ exports.list = function(req, res, next) {
         where: { _user: req.user.id },
         skip: skip,
         limit: limit,
-        populate: '_user'
+        populate: '_user',
+        sort: '-created'
       }
     }
   ];
@@ -210,11 +211,14 @@ exports.get = function(req, res, next) {
  * render the upload view
  */
 exports.show = function(req, res, next) {
+  var shortid = req.param('shortid');
   var options = {
     findOne: true,
-    where: { shortid: req.param('shortid') },
+    where: { shortid: shortid },
     populate: '_user'
   };
+
+  var views;
 
   Upload.load(options)
   .then(function(doc) {
@@ -223,7 +227,32 @@ exports.show = function(req, res, next) {
     // a error for this, just escape the promise.
     if(!doc) throw null;
 
-    res.render('view', { image: doc.publicUrl })
+    // Set cookie if there is none
+    // and increment viewcounter.
+
+    /* istanbul ignore if */
+    if(req.signedCookies.s_uplCvis !== '1') {                                                     // 10 years in ms
+      res.cookie('s_uplCvis', '1', { path: req.path, signed: true, expires: new Date(Date.now() + 315569259747)});
+      views = doc.views + 1;
+
+
+      doc.update({ $inc: { views: 1 }}).exec(function(err, success) {
+        // Don't catch the error.
+        // Updating and emitting the viewcounter is less important than
+        // showing the actual upload.
+
+        // When the doc was updated, emit the new viewcounter
+        // to the room with the shortid from the URL
+        if(success)
+          req.io.sockets.emit(shortid, { views: doc.views + 1});
+      });
+    } else {
+      views = doc.views;
+    }
+
+    // This is rendered before the viewcounter in the database will be incremented.
+    // The views variable will be incremented although the database entry is not saved.
+    res.render('view', { image: doc.publicUrl, views: views });
   })
   .catch(function(err) {
     next(err);
