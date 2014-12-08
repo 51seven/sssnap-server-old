@@ -84,7 +84,7 @@ UploadSchema.statics = {
           if(err.code === 11000) {
             count++;
             if(count < 6) {
-              self.create(upload, count);
+              self.create(newUpload, count);
             } else {
               reject(err);
             }
