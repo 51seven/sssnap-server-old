@@ -217,6 +217,8 @@ exports.show = function(req, res, next) {
     populate: '_user'
   };
 
+  var views;
+
   Upload.load(options)
   .then(function(doc) {
     // If no doc is found, no shortlink exists
@@ -225,21 +227,31 @@ exports.show = function(req, res, next) {
     if(!doc) throw null;
 
     // Set cookie if there is none
-    if(req.signedCookies.s_uplCvis !== '1') {
-      res.cookie('s_uplCvis', '1', { path: req.path, signed: true, expires: new Date(Date.now() + 315569259747)});
+    // and increment viewcounter.
 
-      // This update is an unsafe write because it has no callback.
-      // However, updating the counter is much less important than
-      // showing the real upload, so an error in this exec() will
-      // simply vanish into space and the viewcounter won't increment.
+    /* istanbul ignore if */
+    if(req.signedCookies.s_uplCvis !== '1') {                                                     // 10 years in ms
+      res.cookie('s_uplCvis', '1', { path: req.path, signed: true, expires: new Date(Date.now() + 315569259747)});
+      views = doc.views + 1;
+
+
       doc.update({ $inc: { views: 1 }}).exec(function(err, success) {
-        // When the doc was updated emit the new viewcounter
+        // Don't catch the error.
+        // Updating and emitting the viewcounter is less important than
+        // showing the actual upload.
+
+        // When the doc was updated, emit the new viewcounter
         // to the room with the shortid from the URL
         if(success)
           req.io.sockets.emit(shortid, { views: doc.views + 1});
       });
+    } else {
+      views = doc.views;
     }
-    res.render('view', { image: doc.publicUrl });
+
+    // This is rendered before the viewcounter in the database will be incremented.
+    // The views variable will be incremented although the database entry is not saved.
+    res.render('view', { image: doc.publicUrl, views: views });
   })
   .catch(function(err) {
     next(err);
