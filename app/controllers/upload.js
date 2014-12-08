@@ -151,7 +151,8 @@ exports.list = function(req, res, next) {
         where: { _user: req.user.id },
         skip: skip,
         limit: limit,
-        populate: '_user'
+        populate: '_user',
+        sort: '-created'
       }
     }
   ];

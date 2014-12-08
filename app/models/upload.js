@@ -106,6 +106,7 @@ UploadSchema.statics = {
       query = this.find(options.where);
       query.skip(options.skip);
       query.limit(options.limit);
+      if(options.sort) query.sort(options.sort);
     }
     if(options.select) query.select(options.select);
     if(options.populate) query.populate(options.populate);
