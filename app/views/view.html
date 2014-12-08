@@ -1,5 +1,17 @@
 {% extends 'layout.html' %}
 
+{% block head %}
+  <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
+    <script>
+    var room = window.location.pathname.replace(/\//g, '');
+    var socket = io('https://localhost:3000');
+    socket.on(room, function (data) {
+      document.getElementById('nr').innerHTML = data.views;
+    });
+  </script>
+{% endblock %}
+
 {% block content %}
-<img src="{{ image }}">
+  <img src="{{ image }}">
+  <div class="views"><span id="nr">{{ views }}</span> Views</div>
 {% endblock %}
